@@ -172,7 +172,7 @@ export function OnboardingView() {
         </div>
         {!bridge() && (
           <p className="d st" style={{ ...st(4), marginTop: 14, fontSize: 13 }}>
-            알림은 Android 앱에서 울려요. 웹에서는 규칙만 저장돼요.
+            이 브라우저로도 알림을 받을 수 있어요. 앱을 꺼도 정확한 시각에 울리게 하려면 Android 앱을 써 주세요.
           </p>
         )}
       </>

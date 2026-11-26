@@ -3,6 +3,7 @@
 // 오늘 탭: 다음 끼니 인사말, 메뉴 검색, 오늘 세 끼, 세 식당 비교, 알림·알레르기 안내.
 import { DORMS, MEALS, MEAL_NAME, addDays, dormOf, hoursOf, kstMinute, mainDish, mondayOf, nextMeal, type Dorm, type Meal, type Ymd } from "@/lib/menu";
 import { Ico, Mascot } from "../kit";
+import { ShareButton, toShareMeal } from "../share";
 import { APK_URL } from "../native";
 import { DORM_ICON } from "../sheets";
 import { favorites, hits, useDay, useWeeks } from "../store";
@@ -38,7 +39,7 @@ export function HomePage() {
 }
 
 function Hello() {
-  const { s, today, now, open, go } = useDesk();
+  const { s, today, now, open, go, toast } = useDesk();
   const nm = nextMeal(now);
   const { day, loading, error } = useDay(s.dorm, nm.date);
   const text = day?.meals[nm.meal] ?? "";
@@ -95,6 +96,7 @@ function Hello() {
           <button className="cta" onClick={() => open(nm.date, nm.meal, s.dorm)}>
             식단표에서 보기
           </button>
+          <ShareButton meal={toShareMeal(s.dorm, nm.date, nm.meal, text)} toast={toast} label="이 끼니 공유" small={false} />
           <button className="ghost" onClick={() => go("my")}>
             내 식당 바꾸기
           </button>
@@ -225,7 +227,7 @@ function AlarmBanner() {
           정한 시각에
           <br />그 끼니 메뉴를 알림으로
         </h3>
-        <p>{on ? `알림 규칙 ${on}개 · Android 앱이 울려요` : "웹은 알림을 울릴 수 없어 Android 앱이 울려요"}</p>
+        <p>{on ? `알림 규칙 ${on}개 · 이 브라우저나 Android 앱이 울려요` : "이 브라우저로도, Android 앱으로도 알림을 받을 수 있어요"}</p>
         <div className="acts">
           <a className="cta sm" href={APK_URL} download>
             Android 앱 받기

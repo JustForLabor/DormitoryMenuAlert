@@ -1,7 +1,7 @@
 "use client";
 
 // 알림 탭 (가운데 버튼): C 버전 `dorm-menu alarm add 날 끼니 HH:MM 학사` 규칙을 화면으로 만든 것.
-// Android 앱 안에서는 규칙이 바뀔 때마다 앱에 넘겨 AlarmManager로 예약한다(app.tsx). 웹은 규칙만 저장한다.
+// Android 앱 안에서는 규칙이 바뀔 때마다 앱에 넘겨 AlarmManager로 예약한다(app.tsx). 웹은 이 브라우저 알림으로 보낸다.
 import { useState } from "react";
 import { DORMS, MEALS, MEAL_NAME, addDays, dormOf, isWeekend, kstMinute, kstToday, shortDate, type Dorm, type Meal, type Ymd } from "@/lib/menu";
 import { useMobile } from "../app";
@@ -10,6 +10,7 @@ import { bridge, useNativeState } from "../native";
 import type { Alarm, Repeat } from "../store";
 import { Ico, Icon, Mascot, st } from "../kit";
 import { AppSheet, DORM_ICON } from "../sheets";
+import { WebPushCard } from "../WebPushCard";
 
 const REPEAT_NAME: Record<Repeat, string> = { all: "매일", weekday: "평일", weekend: "주말" };
 const DAY_NAME = ["오늘", "내일"] as const;
@@ -117,25 +118,10 @@ export function AlarmEditSheet({ alarm }: { alarm?: Alarm }) {
 }
 
 function StatusCard() {
-  const { sheet, toast } = useMobile();
+  const { sheet, toast, s } = useMobile();
   const ns = useNativeState();
   if (ns === "web") {
-    return (
-      <div className="card st" style={st(0)}>
-        <div className="ch">
-          <div>
-            <h3>
-              <Ico k="bell" size={24} />
-              알림은 Android 앱에서 울려요
-            </h3>
-            <p className="sub">웹 브라우저는 정한 시각에 알림을 띄울 수 없어요. 앱은 이 화면과 같고, 규칙은 앱 안에 따로 저장돼요.</p>
-          </div>
-        </div>
-        <button className="cta press" style={{ marginTop: 14 }} onClick={() => sheet(<AppSheet />)}>
-          Android 앱 받기
-        </button>
-      </div>
-    );
+    return <WebPushCard alarms={s.alarms} toast={toast} variant="mobile" onApk={() => sheet(<AppSheet />)} />;
   }
   if (ns.permission !== "granted") {
     return (

@@ -1,9 +1,10 @@
 "use client";
 
-// Installable web app (PWA): service worker registration and the "add to home screen" flow.
-// Chrome/Edge/Samsung Internet fire `beforeinstallprompt`, which is kept and replayed from the
-// in-app install button; iOS Safari has no prompt API, so the app explains the Share-sheet steps.
+// 설치형 웹 앱: 서비스 워커 등록, 홈 화면 추가, 새 버전 토스트.
+// Chrome 은 beforeinstallprompt 를 잡아 두었다가 앱 안 버튼으로 다시 띄운다.
+// iOS Safari 는 그 이벤트가 없어 공유 시트 단계를 안내한다.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { track } from "@/lib/track";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -15,7 +16,7 @@ declare global {
     beforeinstallprompt: BeforeInstallPromptEvent;
   }
   interface Navigator {
-    /** iOS Safari: true when launched from the home screen. */
+    /** iOS Safari: 홈 화면에서 열었으면 true. */
     standalone?: boolean;
   }
 }
@@ -23,12 +24,16 @@ declare global {
 export type InstallResult = "accepted" | "dismissed" | "manual";
 
 export interface InstallState {
-  /** Running as the installed app (standalone window). */
+  /** 설치한 앱(standalone)으로 실행 중. */
   installed: boolean;
-  /** iOS/iPadOS: install only through Share → 홈 화면에 추가. */
+  /** iOS/iPadOS 는 공유 → 홈 화면에 추가로만 설치된다. */
   ios: boolean;
-  /** Shows the browser's install prompt when available; "manual" means the caller explains the steps. */
+  /** 브라우저 설치 창이 있으면 띄우고, 없으면 "manual". */
   install: () => Promise<InstallResult>;
+  /** 새 서비스 워커가 기다리고 있다. */
+  updateReady: boolean;
+  /** 기다리는 워커를 켜고 새로고침한다. */
+  applyUpdate: () => void;
 }
 
 const STANDALONE = "(display-mode: standalone)";
@@ -39,24 +44,57 @@ const isIos = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.p
 export function useInstall(onInstalled: () => void): InstallState {
   const [installed, setInstalled] = useState(isStandalone);
   const [ios] = useState(isIos);
+  const [updateReady, setUpdateReady] = useState(false);
   const deferred = useRef<BeforeInstallPromptEvent | null>(null);
   const onInstalledRef = useRef(onInstalled);
+  const reloadOnControl = useRef(false);
   useEffect(() => {
     onInstalledRef.current = onInstalled;
   }, [onInstalled]);
 
   useEffect(() => {
-    // Production only: a dev-server worker would serve stale bundles while editing.
+    const onMessage = (event: MessageEvent) => {
+      const data = event.data as { type?: string; url?: string } | null;
+      if (data?.type === "navigate" && data.url) location.assign(data.url);
+    };
+    const onControl = () => {
+      if (reloadOnControl.current) location.reload();
+    };
+    navigator.serviceWorker?.addEventListener("message", onMessage);
+    navigator.serviceWorker?.addEventListener("controllerchange", onControl);
+
+    // 개발 서버 워커는 고치는 동안 낡은 번들을 주므로 프로덕션에서만 등록한다.
     if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((e: unknown) => console.warn("[ssaltech] service worker registration failed", e));
+      const arm = (worker: ServiceWorker | null) => {
+        if (!worker) return;
+        const done = () => {
+          if (worker.state !== "installed") return;
+          // 처음 방문은 제어권이 없다. 바로 넘겨 페이지가 워커 아래 있게 한다.
+          // 이미 제어 중이면 사용자가 새로고침을 고를 때까지 기다린다.
+          if (navigator.serviceWorker.controller) setUpdateReady(true);
+          else worker.postMessage({ type: "skipWaiting" });
+        };
+        if (worker.state === "installed") done();
+        else worker.addEventListener("statechange", done);
+      };
+      navigator.serviceWorker
+        .register("/sw.js", { scope: "/" })
+        .then((reg) => {
+          arm(reg.installing);
+          arm(reg.waiting);
+          reg.addEventListener("updatefound", () => arm(reg.installing));
+        })
+        .catch((e: unknown) => console.warn("[ssaltech] service worker registration failed", e));
     }
+
     const onPrompt = (e: BeforeInstallPromptEvent) => {
-      e.preventDefault(); // keep it for the in-app button instead of the browser's mini-infobar
+      e.preventDefault();
       deferred.current = e;
     };
     const onAppInstalled = () => {
       deferred.current = null;
       setInstalled(true);
+      track("install_pwa");
       onInstalledRef.current();
     };
     const mq = window.matchMedia(STANDALONE);
@@ -68,16 +106,27 @@ export function useInstall(onInstalled: () => void): InstallState {
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onAppInstalled);
       mq.removeEventListener("change", onMode);
+      navigator.serviceWorker?.removeEventListener("message", onMessage);
+      navigator.serviceWorker?.removeEventListener("controllerchange", onControl);
     };
   }, []);
 
   const install = useCallback(async (): Promise<InstallResult> => {
     const e = deferred.current;
     if (!e) return "manual";
-    deferred.current = null; // a prompt event can be used once
+    deferred.current = null;
     await e.prompt();
     return (await e.userChoice).outcome;
   }, []);
 
-  return useMemo(() => ({ installed, ios, install }), [installed, ios, install]);
+  const applyUpdate = useCallback(() => {
+    reloadOnControl.current = true;
+    setUpdateReady(false);
+    void navigator.serviceWorker.getRegistration().then((reg) => reg?.waiting?.postMessage({ type: "skipWaiting" }));
+  }, []);
+
+  return useMemo(
+    () => ({ installed, ios, install, updateReady, applyUpdate }),
+    [installed, ios, install, updateReady, applyUpdate],
+  );
 }

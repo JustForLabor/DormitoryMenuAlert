@@ -1,19 +1,25 @@
 "use client";
 
 // MY 탭 (WasteLess rMy): 모아 프로필과 기록 수, 알림·내 식당·알레르기·데이터·설치·초기화.
-import { dormOf } from "@/lib/menu";
+import { dormOf, nextMeal, MEAL_NAME } from "@/lib/menu";
+import { useDay } from "../store";
+import { ShareSheet, toShareMeal } from "../share";
 import { useMobile } from "../app";
 import { CountUp } from "../motion";
-import { APK_URL, bridge } from "../native";
+import { APK_URL, bridge, useAppUpdate, type AppUpdate } from "../native";
 import { AL, favorites, ratingCount } from "../store";
 import { Ico, Icon, Mascot, st } from "../kit";
 import { AppSheet, CliSheet, DORM_ICON, DataSheet, DormSheet, HoursSheet, InboxSheet, REPO_URL, ReportSheet, ResetSheet } from "../sheets";
 import { AllergySheet } from "./AllergyView";
 
 export function MyView() {
-  const { s, sheet, go, pwa, toast } = useMobile();
+  const { s, sheet, closeSheet, go, pwa, toast } = useMobile();
   const dorm = dormOf(s.dorm);
+  const nm = nextMeal();
+  const { day: nday } = useDay(s.dorm, nm.date);
+  const shareMeal = toShareMeal(dorm.id, nm.date, nm.meal, nday?.meals[nm.meal] ?? "");
   const app = bridge();
+  const upd = useAppUpdate();
   const on = s.alarms.filter((a) => a.on).length;
   const installApp = async () => {
     if (!pwa.ios && /Android/i.test(navigator.userAgent)) {
@@ -120,6 +126,11 @@ export function MyView() {
           <p>데이터는 이렇게 다뤄요</p>
           <Icon k="chev" />
         </button>
+        <button className="lr press" onClick={() => sheet(<ShareSheet meal={shareMeal} toast={toast} onClose={closeSheet} />)}>
+          <span className="sq"><Icon k="clip" /></span>
+          <p>식단 공유하기<small>{nday?.registered ? `${MEAL_NAME[nm.meal]} · ${shareMeal.dish}` : "내 식당의 다음 끼니"}</small></p>
+          <Icon k="chev" />
+        </button>
         {!app && !pwa.installed && (
           <button className="lr press" onClick={installApp}>
             <span className="sq">
@@ -130,6 +141,29 @@ export function MyView() {
               앱 설치<small>Android는 알림 되는 앱, iPhone·PC는 홈 화면에 추가</small>
             </p>
             <Icon k="chev" />
+          </button>
+        )}
+        {app && upd && (
+          <button
+            className="lr press"
+            disabled={upd.state === "downloading" || upd.state === "checking"}
+            onClick={() => {
+              if (upd.state === "available" || upd.state === "ready") app.startUpdate?.();
+              else {
+                app.checkUpdate?.();
+                toast("새 버전이 있는지 확인할게요");
+              }
+            }}
+          >
+            <span className="sq">
+              {/* eslint-disable-next-line @next/next/no-img-element -- static app icon */}
+              <img src="/assets/icon-192.png" alt="" width={30} height={30} style={{ borderRadius: 8 }} />
+            </span>
+            <p>
+              {updTitle(upd)}
+              <small>{updSub(upd)}</small>
+            </p>
+            {upd.state === "available" ? <span className="badge">NEW</span> : <Icon k="chev" />}
           </button>
         )}
         <button className="more" onClick={() => sheet(<ResetSheet />)}>
@@ -174,4 +208,33 @@ export function MyView() {
       </p>
     </>
   );
+}
+
+function updTitle(u: AppUpdate): string {
+  switch (u.state) {
+    case "available":
+      return `새 버전 ${u.latest?.name ?? ""} 받기`;
+    case "downloading":
+      return `새 버전 받는 중 ${Math.round(u.progress * 100)}%`;
+    case "ready":
+    case "installing":
+      return "설치 창에서 업데이트를 눌러 주세요";
+    case "checking":
+      return "새 버전 확인 중…";
+    case "error":
+      return u.error ?? "업데이트를 확인하지 못했어요";
+    default:
+      return "앱 업데이트";
+  }
+}
+
+function updSub(u: AppUpdate): string {
+  if (u.state === "available" && u.latest) {
+    const kb = u.latest.size / 1024;
+    const mb = u.latest.size ? ` · ${kb < 1024 ? `${Math.round(kb)}KB` : `${(kb / 1024).toFixed(1)}MB`}` : "";
+    return `지금 ${u.current.name}${mb} · 앱 안에서 받아 설치해요`;
+  }
+  if (u.state === "downloading") return "다 받으면 설치 창이 떠요";
+  if (u.state === "error") return "눌러서 다시 확인";
+  return `지금 ${u.current.name} · 눌러서 새 버전 확인`;
 }

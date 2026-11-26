@@ -1,7 +1,9 @@
 "use client";
 
 // MY 탭: 내 식당, 내 기록(별점·좋아하는 메뉴), 이용 시간, 앱·정보, 이 기기 기록 지우기.
-import { DORMS, HOURS, MEALS, MEAL_NAME, SITE_URL, shortDate } from "@/lib/menu";
+import { DORMS, HOURS, MEALS, MEAL_NAME, SITE_URL, dormOf, nextMeal, shortDate } from "@/lib/menu";
+import { ShareButton, toShareMeal } from "../share";
+import { useDay } from "../store";
 import { STAR_OFF, STAR_ON } from "../icons";
 import { Ico, Svg } from "../kit";
 import { CountUp } from "../motion";
@@ -11,7 +13,14 @@ import { favorites, ratingCount } from "../store";
 import { st, useDesk } from "./shared";
 
 export function MyPage() {
-  const { s, update, setView, toast, reset } = useDesk();
+  const { s, update, setView, toast, reset, pwa } = useDesk();
+  const nm = nextMeal();
+  const { day } = useDay(s.dorm, nm.date);
+  const installApp = async () => {
+    const r = await pwa.install();
+    if (r === "manual") toast(pwa.ios ? "Safari 공유 → 홈 화면에 추가를 눌러 주세요" : "브라우저 메뉴에서 앱 설치를 눌러 주세요");
+    else if (r === "dismissed") toast("설치를 나중에 할 수 있어요");
+  };
   const fav = [...favorites(s)];
   const recent = Object.entries(s.rates)
     .sort((a, b) => b[0].localeCompare(a[0]))
@@ -25,6 +34,21 @@ export function MyPage() {
           <p>설정과 기록은 이 브라우저(localStorage)에만 저장돼요. 로그인은 없어요.</p>
         </div>
       </header>
+      <section className="sec st" style={st(1)}>
+        <div className="sh">
+          <h2>공유 · 설치</h2>
+          <span>식단을 보내고, 홈 화면에 둘 수 있어요</span>
+        </div>
+        <div className="acts">
+          <ShareButton meal={toShareMeal(s.dorm, nm.date, nm.meal, day?.meals[nm.meal] ?? "")} toast={toast} label="다음 끼니 공유" />
+          {!pwa.installed && (
+            <button type="button" className="cta sm" onClick={() => void installApp()}>
+              {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
+            </button>
+          )}
+          <a className="cta sm" href={APK_URL} download>Android 앱 받기</a>
+        </div>
+      </section>
 
       <section className="sec st" style={st(1)}>
         <div className="sh">

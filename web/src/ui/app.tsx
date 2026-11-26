@@ -27,6 +27,8 @@ import { FAB_BELL, ICON_DEFS, TAB_ICON } from "./icons";
 import { useInstall, type InstallState } from "./install";
 import { haptic, motion, prefersReducedMotion, SCREEN_IN, SCREEN_OUT, type MotionType } from "./motion";
 import { pushAlarms } from "./native";
+import { hideSsrHome } from "./ssr";
+import { syncPushAlarms } from "./webpush";
 import { loadState, saveState, type AppState } from "./store";
 import { Svg } from "./kit";
 import { HomeView } from "./views/HomeView";
@@ -120,7 +122,9 @@ function boot(): Boot {
   const dormSel = isDorm(dorm) ? dorm : null;
   const m = isMeal(meal) ? meal : null;
   if (!s) return { s, screen: "onb", sel, dormSel, meal: null };
-  return { s, screen: tab && isTab(tab as Screen) ? (tab as Tab) : "home", sel, dormSel, meal: m };
+  // 알림·공유 링크(?date=&meal=)는 식단표에서 그 끼니를 연다.
+  const screen: Screen = tab && isTab(tab as Screen) ? (tab as Tab) : isYmd(date) ? "menu" : "home";
+  return { s, screen, sel, dormSel, meal: m };
 }
 
 interface Entry {
@@ -375,11 +379,13 @@ export function MobileApp() {
     setS(s);
   }, []);
 
-  // 알림 규칙이 바뀔 때마다 Android 앱에 넘긴다(웹에서는 아무 일도 하지 않는다).
+  // 알림 규칙이 바뀔 때마다 Android 앱과, 구독 중이면 웹 푸시 서버에 넘긴다.
   const alarms = S?.alarms;
   useEffect(() => {
-    if (alarms) pushAlarms(alarms);
-  }, [alarms]);
+    if (!alarms) return;
+    pushAlarms(alarms);
+    void syncPushAlarms(alarms, toast);
+  }, [alarms, toast]);
 
   // ---------- sheet ----------
 
@@ -467,6 +473,7 @@ export function MobileApp() {
   const reset = useCallback(() => {
     replaceState(null);
     pushAlarms([]);
+    void syncPushAlarms([], toast);
     stack.current = [];
     scrollPos.current.clear();
     setObLive(EMPTY_OB);
@@ -515,6 +522,10 @@ export function MobileApp() {
   }, [ensureGuard]);
 
   const onInstalled = useCallback(() => toast("홈 화면에 SsalTech를 설치했어요"), [toast]);
+  useLayoutEffect(() => {
+    hideSsrHome();
+  }, []);
+
   const pwa = useInstall(onInstalled);
 
   const ctx = useMemo<MobileCtx>(
@@ -603,6 +614,11 @@ export function MobileApp() {
             <div key={toastSeq} className={`toast${toastOn ? " on" : ""}${toastOn && toastSeq > 1 ? " again" : ""}`} role="status" aria-live="polite">
               {toastMsg}
             </div>
+            {pwa.updateReady && (
+              <button type="button" className="upd" onClick={pwa.applyUpdate}>
+                새 버전이 있어요 · 새로고침
+              </button>
+            )}
             {splash !== "off" && (
               <div className={`splash${splash === "out" ? " out" : ""}`} aria-hidden="true">
                 <div className="mkb">

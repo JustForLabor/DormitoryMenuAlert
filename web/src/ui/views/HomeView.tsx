@@ -10,6 +10,7 @@ import { bridge } from "../native";
 import { dishes, hits, refreshWeeks, useWeeks } from "../store";
 import { AlTile, BanBlock, CrRow, HitBox, Hdr, Ico, Icon, IgBlock, Mascot, RateBlock, Roll, st, type Banner } from "../kit";
 import { AppSheet, CliSheet, DORM_ICON, DormSheet, HoursSheet, InboxSheet, ReportSheet, SearchSheet, nearMondays, useNotices } from "../sheets";
+import { ShareSheet, toShareMeal } from "../share";
 
 const startMin = (range: string) => {
   const [h, m] = range.slice(0, 5).split(":").map(Number);
@@ -49,7 +50,7 @@ function MealRows({ day, next }: { day: DayMenu; next: { date: Ymd; meal: Meal }
 }
 
 export function HomeView() {
-  const { s, go, sheet, setSel, setMView, setDormSel, toast } = useMobile();
+  const { s, go, sheet, closeSheet, setSel, setMView, setDormSel, toast } = useMobile();
   const [rev, setRev] = useState(0);
   const dorm = dormOf(s.dorm);
   const today = kstToday();
@@ -188,6 +189,9 @@ export function HomeView() {
               {curWeek.stale ? " · 저장된 식단" : ""}
             </small>
           </h1>
+          <button type="button" className="pbtn press" style={{ margin: "8px 18px 0", alignSelf: "flex-start" }} onClick={() => sheet(<ShareSheet meal={toShareMeal(s.dorm, nm.date, nm.meal, nday?.meals[nm.meal] ?? "")} toast={toast} onClose={closeSheet} />)}>
+            이 끼니 공유
+          </button>
           <div className="peek">
             <Mascot />
           </div>

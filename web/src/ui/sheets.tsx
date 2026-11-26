@@ -340,7 +340,7 @@ export function AppSheet() {
       ))}
       {pwa.ios ? (
         <p className="sub" style={{ marginTop: 12, fontSize: 13, color: "var(--ink2)" }}>
-          iOS 웹 앱은 정한 시각 알림을 띄울 수 없어요. 알림은 Android 앱이나 터미널 버전(dorm-menu)에서 받아요.
+          iOS 16.4 이상에서 홈 화면에 추가하면 이 브라우저 알림을 받을 수 있어요. 앱을 꺼도 정확한 시각에 울리게 하려면 Android 앱을 써 주세요.
         </p>
       ) : (
         <a className="cta press" href={APK_URL} download style={{ display: "grid", placeItems: "center", marginTop: 16, textDecoration: "none" }}>

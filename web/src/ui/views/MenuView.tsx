@@ -24,9 +24,10 @@ import {
 } from "@/lib/menu";
 import { useMobile } from "../app";
 import { haptic, motion, PullToRefresh, Swap } from "../motion";
+import { AppSheet, DormSheet, HoursSheet, nearMondays } from "../sheets";
+import { ShareSheet, toShareMeal } from "../share";
 import { dishes, favorites, hits, loadable, refreshWeeks, useWeeks } from "../store";
 import { HitBox, Ico, MenuItems, WkChips, st } from "../kit";
-import { HoursSheet } from "../sheets";
 
 /** 날짜가 든 달의 월요일들 (그 달과 겹치는 주) */
 function monthMondays(d: Ymd): Ymd[] {
@@ -43,7 +44,7 @@ function daysInMonth(d: Ymd): Ymd[] {
 }
 
 export function MenuView() {
-  const { s, sheet, sel, setSel, mView, setMView, dormSel, setDormSel, toast } = useMobile();
+  const { s, sheet, closeSheet, sel, setSel, mView, setMView, dormSel, setDormSel, toast } = useMobile();
   const dorm = dormOf(dormSel ?? s.dorm);
   const today = kstToday();
   const thisMon = mondayOf(today);
@@ -94,6 +95,9 @@ export function MenuView() {
                 {MEAL_NAME[m]}
               </b>
               <em className="price">{mainDish(day.meals[m]) || "-"}</em>
+              <button type="button" className="pbtn press" style={{ marginLeft: "auto", flex: "none" }} onClick={() => sheet(<ShareSheet meal={toShareMeal(dorm.id, sel, m, day.meals[m])} toast={toast} onClose={closeSheet} />)}>
+                공유
+              </button>
             </div>
             <p className="sub mt">
               {shortDate(sel)} · 입장 {hoursOf(sel, m)}

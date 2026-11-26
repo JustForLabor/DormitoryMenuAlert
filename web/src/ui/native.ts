@@ -20,6 +20,14 @@ interface Bridge {
   version(): string;
   /** 규칙 하나(JSON)를 지금 바로 한 번 울린다. */
   test(json: string): void;
+  /** Android 공유 시트. 아직 없는 빌드도 있어 호출 전에 함수인지 본다. */
+  share?(title: string, text: string, url: string): void;
+  /** 앱 업데이트 상태 JSON(AppUpdate). 1.1.0 이전 빌드에는 없다. */
+  update?(): string;
+  /** version.json을 지금 다시 받아 본다. 결과는 "ssaltech-native" 이벤트로 온다. */
+  checkUpdate?(): void;
+  /** 새 APK를 받아 설치 창까지 띄운다. */
+  startUpdate?(): void;
 }
 
 declare global {
@@ -75,5 +83,25 @@ export function useNativeState(): { permission: string; exact: boolean } | "web"
   return { permission, exact: exact === "true" };
 }
 
+export type UpdateState = "idle" | "checking" | "available" | "downloading" | "ready" | "installing" | "error";
+export interface AppUpdate {
+  current: { code: number; name: string };
+  latest: { code: number; name: string; notes: string[]; size: number } | null;
+  state: UpdateState;
+  progress: number;
+  error?: string;
+}
+
+/** 앱 안 업데이트 상태. 웹이거나 업데이트 기능이 없는 옛 빌드면 null */
+export function useAppUpdate(): AppUpdate | null {
+  const snap = useSyncExternalStore(subscribe, () => bridge()?.update?.() ?? "", () => "");
+  if (!snap) return null;
+  try {
+    return JSON.parse(snap) as AppUpdate;
+  } catch {
+    return null;
+  }
+}
+
 /** Android 앱 내려받기 주소 (웹에서 안내) */
-export const APK_URL = "/ssaltech.apk";
+export const APK_URL = "/download/android?src=web";

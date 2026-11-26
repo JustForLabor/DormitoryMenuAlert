@@ -6,11 +6,14 @@
 //
 // 주소: ?tab=home|menu|alarm|allergy|my, 알림·공유 링크의 ?dorm=&date=&meal= (식단표 탭으로 연다)
 // 키보드(식단표 탭): ←/→ 하루, ↑/↓ 끼니
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { MEALS, addDays, isDorm, isMeal, isYmd, kstToday, nextMeal, type Dorm, type Meal, type Ymd } from "@/lib/menu";
 import { I, ICON_DEFS, TAB_ICON } from "../icons";
+import { useInstall } from "../install";
 import { Mascot, Svg } from "../kit";
-import { APK_URL } from "../native";
+import { APK_URL, pushAlarms } from "../native";
+import { hideSsrHome } from "../ssr";
+import { syncPushAlarms } from "../webpush";
 import { loadState, saveState, type AppState } from "../store";
 import { AlarmPage } from "./AlarmPage";
 import { AllergyPage } from "./AllergyPage";
@@ -132,7 +135,21 @@ export function DesktopApp() {
     saveState(null);
     setS(structuredClone(DEFAULT_STATE));
   }, []);
-  const desk: Desk = { s, update, today, now, view, setView, sel, setSel, mode, setMode, tab, go, open, toast, burst, reset };
+  const onInstalled = useCallback(() => toast("홈 화면에 SsalTech를 설치했어요"), [toast]);
+  const pwa = useInstall(onInstalled);
+  useLayoutEffect(() => {
+    hideSsrHome();
+  }, []);
+  useEffect(() => {
+    pushAlarms(s.alarms);
+    void syncPushAlarms(s.alarms, toast);
+  }, [s.alarms, toast]);
+  const installApp = async () => {
+    const r = await pwa.install();
+    if (r === "manual") toast(pwa.ios ? "Safari 공유 → 홈 화면에 추가를 눌러 주세요" : "브라우저 메뉴에서 앱 설치를 눌러 주세요");
+    else if (r === "dismissed") toast("설치를 나중에 할 수 있어요");
+  };
+  const desk: Desk = { s, update, today, now, view, setView, sel, setSel, mode, setMode, tab, go, open, toast, burst, reset, pwa };
   const navHost = useRef<HTMLElement>(null);
   const thumb = useThumb(navHost, tab, "y");
   const alarmsOn = s.alarms.filter((a) => a.on).length;
@@ -165,11 +182,18 @@ export function DesktopApp() {
           <span className="sp" />
           <div className="promo">
             <Mascot className="pm" />
-            <b>휴대폰에서 메뉴 알림 받기</b>
-            <p>정한 시각에 그 끼니 메뉴가 와요</p>
-            <a className="cta sm" href={APK_URL} download>
-              Android 앱 받기
-            </a>
+            <b>{pwa.installed ? "앱으로 보고 있어요" : "홈 화면에 추가하기"}</b>
+            <p>{pwa.installed ? "이 브라우저로 알림도 받을 수 있어요" : "앱처럼 열고, 알림도 이 브라우저로"}</p>
+            <div className="stack">
+              {!pwa.installed && (
+                <button type="button" className="cta sm" onClick={() => void installApp()}>
+                  {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
+                </button>
+              )}
+              <a className="cta sm apk" href={APK_URL} download>
+                Android 앱 받기
+              </a>
+            </div>
           </div>
           <a className="tiny" href="/?ui=mobile">
             휴대폰 화면으로 보기
@@ -191,6 +215,11 @@ export function DesktopApp() {
             </p>
           )}
         </div>
+        {pwa.updateReady && (
+          <button type="button" className="upd" onClick={pwa.applyUpdate}>
+            새 버전이 있어요 · 새로고침
+          </button>
+        )}
         {bursts.map((b) => (
           <span key={b.id} className="burst" style={{ left: b.x, top: b.y }} aria-hidden="true">
             {BURST.map((p, i) => (

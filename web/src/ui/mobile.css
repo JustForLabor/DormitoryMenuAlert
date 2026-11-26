@@ -496,3 +496,21 @@
 .wlm .tk-step button:disabled{opacity:.35}
 .wlm .tk-step b{min-width:22px;text-align:center;font-size:16px;font-weight:850}
 .wlm .sbox svg{width:24px;height:24px;flex:none}
+
+.wlm .upd{position:fixed;left:50%;bottom:148px;transform:translateX(-50%);z-index:40;border:0;border-radius:999px;padding:12px 18px;background:#17191E;color:#fff;font:inherit;font-size:14px;font-weight:800;white-space:nowrap;box-shadow:0 10px 28px rgba(23,25,30,.28);cursor:pointer;animation:wlmUpd .5s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes wlmUpd{from{opacity:0;transform:translate(-50%,18px)}}
+.wlm .push-note{margin:0 0 12px;padding:12px 14px;border-radius:14px;background:#FFF4EE;color:#9A3B22;font-size:13px;line-height:1.45}
+.wlm .push-acts{display:flex;gap:8px;margin-top:12px}
+.wlm .push-acts .pbtn,.wlm .push-acts .cta{flex:1;display:inline-flex;align-items:center;justify-content:center;height:46px;min-height:0;margin:0;padding:0 12px;border-radius:14px;font-size:14.5px;white-space:nowrap}
+.wlm .lr .badge{flex:none;padding:3px 9px;border-radius:99px;background:var(--grad,#FF6A45);color:#fff;font-size:11.5px;font-weight:850;letter-spacing:.02em}
+.wlm .sd{margin:0 0 12px;color:var(--ink3);font-size:13px}
+.wlm .share-list{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 4px;margin-top:18px}
+.wlm .share-list .si{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 0;border:0;border-radius:16px;background:transparent;color:var(--ink);font:inherit;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer}
+.wlm .share-list .si:active{background:#F3F4F7}
+.wlm .sico{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;box-shadow:0 6px 16px rgba(23,25,30,.10)}
+.wlm .sico svg{width:30px;height:30px}
+.wlm .sico-kakao{background:#FEE500}
+.wlm .sico-facebook{background:#1877F2}
+.wlm .sico-x{background:#000}
+.wlm .sico-instagram{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
+.wlm .sico-copy,.wlm .sico-more{background:#EEF0F3}

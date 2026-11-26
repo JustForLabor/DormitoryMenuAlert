@@ -19,6 +19,7 @@ import { MEALS, MEAL_NAME, addDays, dormOf, mainDish, mondayOf, shortDate, type 
 import type { IconName } from "../icons";
 import { I, STAR_OFF, STAR_ON } from "../icons";
 import { Svg, st } from "../kit";
+import type { InstallState } from "../install";
 import { dishes, loadedWeeks, useWeeks, type AppState } from "../store";
 
 export type DTab = "home" | "menu" | "alarm" | "allergy" | "my";
@@ -50,6 +51,8 @@ export interface Desk {
   burst: (x: number, y: number) => void;
   /** 이 기기 기록을 지운다 (휴대폰 화면은 다음에 처음 화면부터) */
   reset: () => void;
+  /** 홈 화면 추가·새 버전 */
+  pwa: InstallState;
 }
 
 export const MEAL_ICO: Record<Meal, IconName> = { breakfast: "bowl", lunch: "tray", dinner: "salad" };

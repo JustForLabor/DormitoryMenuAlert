@@ -24,6 +24,7 @@ import {
 } from "@/lib/menu";
 import { Ico } from "../kit";
 import { DORM_ICON } from "../sheets";
+import { ShareButton, toShareMeal } from "../share";
 import { AL, dishes, favorites, hits, loadable, refreshWeeks, useDay, useWeeks, type Dish } from "../store";
 import { MEAL_ICO, Search, Seg, Stars, dayLabel, fixedDishes, monthMondays, st, useDesk, weekDates } from "./shared";
 
@@ -354,6 +355,7 @@ function DetailPanel() {
               )}
             </p>
           </div>
+          <ShareButton icon label="이 끼니 공유" meal={toShareMeal(view, sel.date, sel.meal, day?.meals[sel.meal] ?? "")} toast={toast} />
         </div>
         <div className="pbody">
           {day && !day.registered ? (

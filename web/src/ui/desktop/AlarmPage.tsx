@@ -1,12 +1,13 @@
 "use client";
 
 // 알림 탭: 휴대폰 화면의 알림 규칙(C 버전 `dorm-menu alarm add`)을 넓게 보고 고친다.
-// 웹은 알림을 울릴 수 없어 규칙만 이 브라우저에 저장하고, 실제 알림은 Android 앱이 울린다.
+// 이 브라우저 알림(웹 푸시)과 Android 앱 알림을 함께 둔다.
 import { useState } from "react";
 import { DORMS, MEALS, MEAL_NAME, dormOf, type Dorm, type Meal } from "@/lib/menu";
 import { Ico, Mascot } from "../kit";
 import { APK_URL } from "../native";
 import { DORM_ICON } from "../sheets";
+import { WebPushCard } from "../WebPushCard";
 import type { Alarm, Repeat } from "../store";
 import { PRESETS, newId, nextFire, ruleText } from "../views/AlarmView";
 import { Seg, dayLabel, st, useDesk } from "./shared";
@@ -21,7 +22,7 @@ const sameRule = (a: Pick<Alarm, "offset" | "meal" | "time" | "dorm">, b: Pick<A
   a.offset === b.offset && a.meal === b.meal && a.time === b.time && a.dorm === b.dorm;
 
 export function AlarmPage() {
-  const { s, today } = useDesk();
+  const { s, today, toast } = useDesk();
   const on = s.alarms.filter((a) => a.on);
   // nextFire는 오늘 이미 지난 시각을 건너뛴다
   const next = on
@@ -33,7 +34,7 @@ export function AlarmPage() {
       <header className="ph st" style={st(0)}>
         <div>
           <h1>알림</h1>
-          <p>정한 시각에 그 끼니 메뉴를 보내 드려요. 알림은 Android 앱이 울려요.</p>
+          <p>정한 시각에 그 끼니 메뉴를 보내 드려요. 이 브라우저 알림 또는 Android 앱이 울려요.</p>
         </div>
       </header>
       <section className="ahero st" style={st(1)}>
@@ -63,6 +64,9 @@ export function AlarmPage() {
           <Mascot className="am" wave={false} />
         </span>
       </section>
+      <div className="st" style={st(2)}>
+        <WebPushCard alarms={s.alarms} toast={toast} variant="desktop" />
+      </div>
       <div className="duo">
         <Rules />
         <NewRule />
@@ -195,7 +199,7 @@ function Install() {
     <section className="sec install st" style={st(4)}>
       <div className="sh">
         <h2>휴대폰에서 알림 받기</h2>
-        <span>웹에서 만든 규칙은 이 브라우저에만 저장돼요. 앱에서는 앱 안에서 정해 주세요.</span>
+        <span>이 브라우저로도 받을 수 있고, Android 앱은 더 정확한 시각에 울려요.</span>
       </div>
       <ol className="steps">
         <li style={st(0)}>
@@ -218,7 +222,7 @@ function Install() {
             <Ico k="apple" size={22} />
           </i>
           <b>아이폰은 홈 화면에</b>
-          <p>Safari 공유 → 홈 화면에 추가. 정한 시각 알림은 없어요</p>
+          <p>Safari 공유 → 홈 화면에 추가. iOS 16.4 이상이면 이 브라우저 알림을 받아요</p>
         </li>
       </ol>
       <a className="cta" href={APK_URL} download>
