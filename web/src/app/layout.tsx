@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@/ui/mobile.css";
 import "@/ui/motion.css";
 import "@/ui/views.css";
+import "@/ui/desktop/desktop.css";
 
 export const metadata: Metadata = {
   title: "SsalTech · 서울과기대 생활관 식단",

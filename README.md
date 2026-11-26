@@ -218,7 +218,11 @@ dorm-menu : 서울과기대 생활관 식단 알리미
     src/app/api/menu   GET ?dorm=kb&date=YYYY-MM-DD → 그 주 7일
                        다 올라온 주는 CDN에 12시간 캐시
     src/app/api/notify GET ?dorm&date&meal → 알림 제목·본문 한 끼
-    src/ui/            화면 (오늘·식단·알림·알레르기·MY)
+    src/ui/            휴대폰 화면 (오늘·식단·알림·알레르기·MY)
+    src/ui/desktop/    데스크톱 화면: 주간·월간 식단표, 세 식당 비교,
+                       고른 끼니 상세·별점, 알레르기 설정
+                       폭 1024px 이상이면 데스크톱 화면, ?ui=mobile 또는
+                       ?ui=desktop 으로 고를 수 있다. Android 앱 안은 늘 휴대폰 화면.
     알레르기는 사이트에 번호가 없어 메뉴 이름으로 짐작한다.
     설정·별점·알림 규칙은 그 기기(localStorage)에만 저장한다.
 
