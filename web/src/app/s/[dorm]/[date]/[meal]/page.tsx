@@ -37,19 +37,20 @@ export default async function SharePage({ params, searchParams }: Props) {
   }
   const href = `/?${q}`;
   return (
-    <article style={{ maxWidth: 640, margin: "0 auto", padding: "36px 20px 64px", fontFamily: '"Pretendard Variable", Pretendard, sans-serif', color: "#17191E" }}>
-      <p style={{ margin: 0, color: "#FF6A45", fontWeight: 800 }}>SsalTech</p>
-      <h1 style={{ margin: "8px 0 0", fontSize: 28, letterSpacing: "-0.03em" }}>{view.title}</h1>
-      <p style={{ marginTop: 12, lineHeight: 1.55, color: "#555C68" }}>{view.body}</p>
+    // 사람은 GoApp 이 바로 앱으로 보내므로 본문은 크롤러·화면 낭독기만 읽게 숨긴다.
+    <article style={{ position: "absolute", width: 1, height: 1, margin: -1, padding: 0, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap", border: 0 }}>
+      <p>SsalTech</p>
+      <h1>{view.title}</h1>
+      <p>{view.body}</p>
       {view.items.length > 0 && (
-        <ul style={{ marginTop: 18, paddingLeft: 18, lineHeight: 1.7 }}>
+        <ul>
           {view.items.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
       )}
-      <p style={{ marginTop: 24 }}>
-        <a href={href} style={{ color: "#FF6A45", fontWeight: 800 }}>SsalTech에서 보기</a>
+      <p>
+        <a href={href}>SsalTech에서 보기</a>
       </p>
       <GoApp href={href} />
     </article>

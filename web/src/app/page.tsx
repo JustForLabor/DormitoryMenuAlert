@@ -26,31 +26,34 @@ async function todayMenu(dorm: Dorm, monday: Ymd, date: Ymd) {
   }
 }
 
-/** 크롤러와 첫 페인트용 본문. 앱이 올라오면 치운다. */
+// 화면에 그리지 않는 숨김 스타일: 크롤러와 화면 낭독기는 읽고, 사람에게는 앱이 뜨기 전에도 보이지 않는다.
+const HIDDEN = { position: "absolute", width: 1, height: 1, margin: -1, padding: 0, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap", border: 0 } as const;
+
+/** 크롤러용 본문. 화면에는 보이지 않고, 앱이 올라오면 치운다. */
 export default async function Page() {
   const today = kstToday();
   const monday = mondayOf(today);
   const days = await Promise.all(DORMS.map((d) => todayMenu(d.id, monday, today)));
   return (
     <>
-      <section id="ssr-home" aria-label="오늘의 식단" style={{ maxWidth: 720, margin: "0 auto", padding: "32px 20px 48px", fontFamily: '"Pretendard Variable", Pretendard, sans-serif', color: "#17191E", background: "#F3F4F7", minHeight: "100vh" }}>
-        <h1 style={{ margin: 0, fontSize: 32, letterSpacing: "-0.03em" }}>SsalTech</h1>
-        <p style={{ marginTop: 8, lineHeight: 1.55, color: "#555C68" }}>서울과학기술대학교 생활관(KB·성림·수림학사) 식단을 보고, 정한 시각에 알림을 받아요.</p>
-        <p style={{ marginTop: 16, fontWeight: 800 }}>{shortDate(today)} 식단</p>
+      <section id="ssr-home" aria-label="오늘의 식단" style={HIDDEN}>
+        <h1>SsalTech</h1>
+        <p>서울과학기술대학교 생활관(KB·성림·수림학사) 식단을 보고, 정한 시각에 알림을 받아요.</p>
+        <p>{shortDate(today)} 식단</p>
         {days.map((day) => (
-          <article key={day.dorm} style={{ marginTop: 16, padding: 16, borderRadius: 18, background: "#fff" }}>
-            <h2 style={{ margin: 0, fontSize: 18 }}>{dormOf(day.dorm).name}</h2>
-            {day.note ? <p style={{ margin: "8px 0 0", color: "#555C68" }}>{day.note}</p> : null}
+          <article key={day.dorm}>
+            <h2>{dormOf(day.dorm).name}</h2>
+            {day.note ? <p>{day.note}</p> : null}
             {day.meals.map((m) => (
-              <p key={m.name} style={{ margin: "8px 0 0", lineHeight: 1.5 }}>
+              <p key={m.name}>
                 <b>{m.name}</b> {m.dish || "운영하지 않아요"}
-                {m.items.length > 0 ? <span style={{ color: "#555C68" }}> · {m.items.join(", ")}</span> : null}
+                {m.items.length > 0 ? <span> · {m.items.join(", ")}</span> : null}
               </p>
             ))}
           </article>
         ))}
-        <p style={{ marginTop: 20 }}>
-          <a href="/?tab=menu" style={{ color: "#FF6A45", fontWeight: 800 }}>식단표 보기</a>
+        <p>
+          <a href="/?tab=menu">식단표 보기</a>
         </p>
       </section>
       <ClientPage />
