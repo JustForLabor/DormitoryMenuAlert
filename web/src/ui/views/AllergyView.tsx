@@ -10,7 +10,8 @@ import { AL, dishes, hits, useWeeks, type Dish } from "../store";
 import { Ico, Icon, Mascot, innerOf, st } from "../kit";
 import { nearMondays } from "../sheets";
 
-const SHIELD_PROP = `<g transform="translate(80 58) scale(.66)">${innerOf("shield")}</g>`;
+// 함수로 둔다: kit ↔ app 순환 import 때문에 모듈을 읽는 순간에는 innerOf가 아직 없을 수 있다(데스크톱 화면이 kit부터 읽는다).
+const shieldProp = () => `<g transform="translate(80 58) scale(.66)">${innerOf("shield")}</g>`;
 
 export function AllergySheet({ onSave }: { onSave?: (al: number[]) => void }) {
   const { s, update, closeSheet, toast } = useMobile();
@@ -106,7 +107,7 @@ export function AllergyView() {
         </h2>
         <p>메뉴 이름에 든 재료 낱말로 이 기기 안에서 짐작해요.</p>
         <div className="ill">
-          <Mascot wave={false} prop={SHIELD_PROP} />
+          <Mascot wave={false} prop={shieldProp()} />
         </div>
       </div>
       <div className="card st" style={st(1)}>
