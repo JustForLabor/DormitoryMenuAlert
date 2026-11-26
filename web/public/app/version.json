@@ -1,0 +1,12 @@
+{
+  "versionCode": 2,
+  "versionName": "1.1.0",
+  "url": "https://dorm.ybkim.pe.kr/download/android?src=update",
+  "sha256": "162471a591232470fbd287f90810f0106eecd0aa8cd62c02e69f92b19223d8c5",
+  "size": 131716,
+  "notes": [
+    "알림이 다른 앱처럼 화면 위에 뜨고, 식단 전체를 보여 줘요.",
+    "앱 안에서 새 버전을 받아 설치할 수 있어요."
+  ],
+  "published": "2026-11-27"
+}

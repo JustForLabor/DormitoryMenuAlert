@@ -16,12 +16,17 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.net.URISyntaxException;
+
 /**
  * SsalTech 웹 앱(BuildConfig.BASE_URL)을 띄우는 WebView 껍데기. 화면은 웹과 같고,
- * 이 앱이 더하는 것은 정한 시각 알림(Alarms)뿐이다. 웹 앱은 window.SsalTechNative 가 있으면 앱 안이라고 본다.
+ * 이 앱이 더하는 것은 정한 시각 알림(Alarms)과 앱 안 업데이트(Updater)다.
+ * 웹 앱은 window.SsalTechNative 가 있으면 앱 안이라고 본다.
  */
 public class MainActivity extends Activity {
     static final String EXTRA_PATH = "path";
+    /** 디버그 빌드만 읽는다. 릴리스는 Updater 가 이 값을 버린다. */
+    static final String EXTRA_UPDATE_MANIFEST = "update_manifest";
     private static final String NATIVE_EVENT = "window.dispatchEvent(new Event('ssaltech-native'))";
     private WebView web;
 
@@ -29,6 +34,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        applyDebugUpdateOverride(getIntent());
         Alarms.ensureChannel(this);
         web = new WebView(this);
         if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true);
@@ -45,10 +51,7 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
-                Uri u = req.getUrl();
-                if (u.getHost() != null && u.getHost().equals(Uri.parse(BuildConfig.BASE_URL).getHost())) return false;
-                openOutside(u);
-                return true;
+                return handleUrl(req.getUrl());
             }
 
             @Override
@@ -62,6 +65,8 @@ public class MainActivity extends Activity {
         else web.loadUrl(urlFor(getIntent()));
         // 앱을 처음 열 때도 저장된 규칙을 다시 건다(설치 직후·강제 종료 뒤).
         new Thread(() -> Alarms.scheduleAll(getApplicationContext()), "ssaltech-schedule").start();
+        Updater.attach(this);
+        Updater.onLaunch(this);
     }
 
     private static String urlFor(Intent intent) {
@@ -69,10 +74,75 @@ public class MainActivity extends Activity {
         return BuildConfig.BASE_URL + (path != null && path.startsWith("/") ? path : "/");
     }
 
+    private void applyDebugUpdateOverride(Intent intent) {
+        if (!BuildConfig.DEBUG || intent == null) return;
+        String u = intent.getStringExtra(EXTRA_UPDATE_MANIFEST);
+        if (u != null) Updater.setDebugManifest(u);
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        setIntent(intent);
+        applyDebugUpdateOverride(intent);
         if (intent.hasExtra(EXTRA_PATH)) web.loadUrl(urlFor(intent));
+    }
+
+    /** http(s) 같은 호스트만 웹뷰에 두고, intent:·카카오·마켓 등은 앱으로 연다. */
+    private boolean handleUrl(Uri u) {
+        if (u == null) return true;
+        String scheme = u.getScheme();
+        if (scheme == null) return true;
+        if ("http".equals(scheme) || "https".equals(scheme)) {
+            String host = Uri.parse(BuildConfig.BASE_URL).getHost();
+            if (u.getHost() != null && u.getHost().equals(host)) return false;
+            openOutside(u);
+            return true;
+        }
+        if ("intent".equals(scheme)) {
+            openIntentUri(u.toString());
+            return true;
+        }
+        openOutside(u);
+        return true;
+    }
+
+    private void openIntentUri(String raw) {
+        Intent intent;
+        try {
+            intent = Intent.parseUri(raw, Intent.URI_INTENT_SCHEME);
+        } catch (URISyntaxException e) {
+            Toast.makeText(this, raw, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+        intent.setComponent(null);
+        intent.setSelector(null);
+        try {
+            startActivity(intent);
+            return;
+        } catch (ActivityNotFoundException ignored) {
+            // 아래 폴백
+        }
+        String fallback = intent.getStringExtra("browser_fallback_url");
+        if (fallback != null && !fallback.isEmpty()) {
+            Uri f = Uri.parse(fallback);
+            String sch = f.getScheme();
+            if ("http".equals(sch) || "https".equals(sch)) {
+                String host = Uri.parse(BuildConfig.BASE_URL).getHost();
+                if (f.getHost() != null && f.getHost().equals(host)) web.loadUrl(fallback);
+                else openOutside(f);
+                return;
+            }
+        }
+        String pkg = intent.getPackage();
+        if (pkg != null) {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + pkg)));
+            } catch (ActivityNotFoundException e) {
+                openOutside(Uri.parse("https://play.google.com/store/apps/details?id=" + pkg));
+            }
+        }
     }
 
     private void openOutside(Uri u) {
@@ -83,9 +153,12 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** 권한·알림함이 바뀌었다고 웹 앱에 알린다(native.ts useNativeState 가 다시 읽는다). */
+    /** 권한·알림함·업데이트가 바뀌었다고 웹 앱에 알린다(native.ts 가 다시 읽는다). */
     void notifyWeb() {
-        runOnUiThread(() -> web.evaluateJavascript(NATIVE_EVENT, null));
+        if (web == null) return;
+        runOnUiThread(() -> {
+            if (web != null) web.evaluateJavascript(NATIVE_EVENT, null);
+        });
     }
 
     @Override
@@ -97,6 +170,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        Updater.attach(this);
+        Updater.onResume(this);
         if (web != null) notifyWeb();
     }
 
@@ -116,7 +191,8 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        web.destroy();
+        if (web != null) web.destroy();
+        web = null;
         super.onDestroy();
     }
 }

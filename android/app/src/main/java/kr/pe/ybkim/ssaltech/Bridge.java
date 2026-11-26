@@ -86,6 +86,35 @@ final class Bridge {
         }
     }
 
+    @JavascriptInterface
+    public void share(String title, String text, String url) {
+        activity.runOnUiThread(() -> {
+            Intent send = new Intent(Intent.ACTION_SEND);
+            send.setType("text/plain");
+            send.putExtra(Intent.EXTRA_TITLE, title);
+            send.putExtra(Intent.EXTRA_SUBJECT, title);
+            String body = text == null ? "" : text;
+            if (url != null && !url.isEmpty()) body = body.isEmpty() ? url : body + "\n" + url;
+            send.putExtra(Intent.EXTRA_TEXT, body);
+            activity.startActivity(Intent.createChooser(send, title == null ? "" : title));
+        });
+    }
+
+    @JavascriptInterface
+    public String update() {
+        return Updater.statusJson();
+    }
+
+    @JavascriptInterface
+    public void checkUpdate() {
+        Updater.check(activity, true);
+    }
+
+    @JavascriptInterface
+    public void startUpdate() {
+        activity.runOnUiThread(() -> Updater.startUpdate(activity));
+    }
+
     /** 규칙 하나를 지금 한 번 울린다(알림 탭의 "시험 알림"). */
     @JavascriptInterface
     public void test(String json) {

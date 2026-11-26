@@ -21,8 +21,8 @@ android {
         applicationId = "kr.pe.ybkim.ssaltech"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = (findProperty("versionCode") as String?)?.toInt() ?: 2
+        versionName = (findProperty("versionName") as String?) ?: "1.1.0"
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
         manifestPlaceholders["cleartext"] = baseUrl.startsWith("http://").toString()
     }
@@ -41,6 +41,9 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (keystoreProps.isNotEmpty()) signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
             if (keystoreProps.isNotEmpty()) signingConfig = signingConfigs.getByName("release")
         }
     }

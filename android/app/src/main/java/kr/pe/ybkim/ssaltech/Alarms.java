@@ -8,6 +8,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -37,7 +40,9 @@ import java.util.Set;
 final class Alarms {
     static final String TAG = "SsalTech";
     static final ZoneId KST = ZoneId.of("Asia/Seoul");
-    static final String CHANNEL = "menu";
+    /** 예전 채널(menu)은 중요도를 올릴 수 없어 지우고, 헤드업용 새 채널을 쓴다. */
+    static final String CHANNEL = "menu-heads";
+    private static final String OLD_CHANNEL = "menu";
     static final String ACTION_FIRE = "kr.pe.ybkim.ssaltech.FIRE";
     static final String EXTRA_ID = "id";
     private static final String PREFS = "ssaltech";
@@ -46,6 +51,7 @@ final class Alarms {
     private static final String K_INBOX = "inbox";
     private static final int INBOX_MAX = 20;
     private static final int TIMEOUT_MS = 4000;
+    private static Bitmap largeIcon;
 
     private Alarms() {}
 
@@ -193,25 +199,60 @@ final class Alarms {
         } finally {
             if (conn != null) conn.disconnect();
         }
-        notify(c, a.optString("id", "test").hashCode(), title, body, "/?tab=menu&date=" + date + "&dorm=" + dorm + "&meal=" + meal);
+        String path = "/?dorm=" + enc(dorm) + "&date=" + date + "&meal=" + enc(meal) + "&utm_source=push&utm_medium=notification";
+        notify(c, a.optString("id", "test"), title, body, path, date.toString());
         remember(c, title, body);
+    }
+
+    private static String enc(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            return s;
+        }
     }
 
     static void ensureChannel(Context c) {
         NotificationManager nm = c.getSystemService(NotificationManager.class);
-        NotificationChannel ch = new NotificationChannel(CHANNEL, c.getString(R.string.channel_menu), NotificationManager.IMPORTANCE_DEFAULT);
+        nm.deleteNotificationChannel(OLD_CHANNEL);
+        NotificationChannel ch = new NotificationChannel(CHANNEL, c.getString(R.string.channel_menu), NotificationManager.IMPORTANCE_HIGH);
         ch.setDescription(c.getString(R.string.channel_menu_desc));
+        ch.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        ch.enableLights(true);
+        ch.setShowBadge(true);
         nm.createNotificationChannel(ch);
     }
 
-    private static void notify(Context c, int id, String title, String body, String path) {
+    private static Bitmap appIcon(Context c) {
+        if (largeIcon != null) return largeIcon;
+        Drawable d = c.getPackageManager().getApplicationIcon(c.getApplicationInfo());
+        int s = Math.max(1, (int) (64 * c.getResources().getDisplayMetrics().density));
+        Bitmap b = Bitmap.createBitmap(s, s, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(b);
+        d.setBounds(0, 0, s, s);
+        d.draw(canvas);
+        largeIcon = b;
+        return b;
+    }
+
+    private static void notify(Context c, String alarmId, String title, String body, String path, String date) {
         ensureChannel(c);
+        long now = System.currentTimeMillis();
+        int childId = alarmId.hashCode() & 0x7fffffff;
+        if (childId == 0) childId = 1;
+        int summaryId = ("summary:" + date).hashCode() & 0x7fffffff;
         Intent open = new Intent(c, MainActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 .putExtra(MainActivity.EXTRA_PATH, path);
-        PendingIntent pi = PendingIntent.getActivity(c, id, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        Notification n = new Notification.Builder(c, CHANNEL)
+        PendingIntent pi = PendingIntent.getActivity(c, childId, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        String group = "menu-" + date;
+        Notification.Action action = new Notification.Action.Builder(
+                android.graphics.drawable.Icon.createWithResource(c, R.drawable.ic_notify),
+                c.getString(R.string.action_open_menu),
+                pi).build();
+        Notification child = new Notification.Builder(c, CHANNEL)
                 .setSmallIcon(R.drawable.ic_notify)
+                .setLargeIcon(appIcon(c))
                 .setColor(0xFFFF6A45)
                 .setContentTitle(title)
                 .setContentText(body)
@@ -219,8 +260,32 @@ final class Alarms {
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .setCategory(Notification.CATEGORY_REMINDER)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setWhen(now)
+                .setShowWhen(true)
+                .setGroup(group)
+                .addAction(action)
                 .build();
-        c.getSystemService(NotificationManager.class).notify(id, n);
+        Notification summary = new Notification.Builder(c, CHANNEL)
+                .setSmallIcon(R.drawable.ic_notify)
+                .setLargeIcon(appIcon(c))
+                .setColor(0xFFFF6A45)
+                .setContentTitle(c.getString(R.string.notif_group))
+                .setContentText(title)
+                .setStyle(new Notification.InboxStyle().addLine(title).setSummaryText(c.getString(R.string.app_name)))
+                .setContentIntent(pi)
+                .setAutoCancel(true)
+                .setCategory(Notification.CATEGORY_REMINDER)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setWhen(now)
+                .setShowWhen(true)
+                .setGroup(group)
+                .setGroupSummary(true)
+                .setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
+                .build();
+        NotificationManager nm = c.getSystemService(NotificationManager.class);
+        nm.notify(childId, child);
+        nm.notify(summaryId, summary);
     }
 
     private static synchronized void remember(Context c, String title, String body) {
