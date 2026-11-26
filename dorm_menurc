@@ -1,0 +1,5 @@
+# dorm-menu 설정 파일 (실행 파일과 같은 폴더에 둔다)
+# 알림 시각은 여기가 아니라 명령으로 정한다:  dorm-menu alarm add 내일 아침 21:00
+
+dorm = kb            # kb (불암·KB·창명) | sunglim (성림·누리) | surim (수림)
+# tty = /dev/pts/3   # 알림 보낼 터미널을 고정할 때만
