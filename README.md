@@ -200,3 +200,47 @@ dorm-menu : 서울과기대 생활관 식단 알리미
   - 출력은 UTF-8이다. PuTTY 설정에서
     Window > Translation > Remote character set 이 UTF-8이어야
     한글이 보인다.
+
+
+10. 웹 앱과 Android 앱 (SsalTech)
+---------------------------------
+
+  같은 기능을 휴대폰에서 쓰도록 만든 모바일 웹 앱과, 그 웹 앱을
+  띄우고 정한 시각에 알림을 울리는 Android 앱이다. C 코드(Source/)는
+  건드리지 않았고 사이트 요청·파싱 규칙(8절)을 TypeScript로 옮겼다.
+
+    https://dorm.ybkim.pe.kr       웹 앱 (아이폰은 홈 화면에 추가)
+    https://dorm.ybkim.pe.kr/ssaltech.apk   Android 앱
+
+  web/  (Next.js, Vercel 서울 리전 icn1)
+    src/lib/site.ts    생활관 사이트에서 주 단위로 받기 (항상 월요일)
+    src/lib/menu.ts    <table class="chang"> 파싱, 날짜 계산
+    src/app/api/menu   GET ?dorm=kb&date=YYYY-MM-DD → 그 주 7일
+                       다 올라온 주는 CDN에 12시간 캐시
+    src/app/api/notify GET ?dorm&date&meal → 알림 제목·본문 한 끼
+    src/ui/            화면 (오늘·식단·알림·알레르기·MY)
+    알레르기는 사이트에 번호가 없어 메뉴 이름으로 짐작한다.
+    설정·별점·알림 규칙은 그 기기(localStorage)에만 저장한다.
+
+      cd web && npm install && npm run dev
+
+  android/  (Java, 외부 라이브러리 없음, minSdk 26)
+    MainActivity   WebView로 웹 앱을 띄운다
+    Bridge         웹 앱의 window.SsalTechNative (web/src/ui/native.ts)
+    Alarms         규칙마다 다음 시각을 AlarmManager 정확한 알람으로
+                   예약. 울릴 때 /api/notify 에서 메뉴를 받아 알림을
+                   띄우고 다음 시각을 다시 예약한다.
+    BootReceiver   재부팅·업데이트·시계 변경 뒤 다시 예약
+
+      cd android && ./gradlew assembleRelease
+      ./gradlew assembleDebug -PbaseUrl=http://10.0.2.2:3000
+                                 에뮬레이터에서 로컬 웹 서버로 시험
+
+    서명 키는 저장소 밖에 둔다. android/keystore.properties 에
+    storeFile, storePassword, keyAlias, keyPassword 를 적으면
+    release 빌드에 쓰인다. 만든 APK는 web/public/ssaltech.apk 로
+    복사해 웹과 함께 배포한다.
+
+  웹 브라우저에는 정한 시각에 알림을 울릴 방법이 없어서, 웹에서는
+  알림 규칙만 정하고 실제 알림은 Android 앱이 울린다. 앱의 규칙은
+  앱 안 WebView에 따로 저장된다.

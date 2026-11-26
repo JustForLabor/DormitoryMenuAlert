@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SsalTech</string>
+    <string name="channel_menu">식단 알림</string>
+    <string name="channel_menu_desc">정한 시각에 그 끼니 메뉴를 알려 줘요</string>
+    <string name="offline">인터넷에 연결되지 않았어요. 연결되면 다시 불러올게요.</string>
+</resources>
