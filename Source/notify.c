@@ -14,7 +14,7 @@
 
 #include "menu.h"
 
-/* 식당 퇴장 시각(분). 이 시각이 지나면 다음 끼니를 보여 준다. 출처: 생활관 식당이용시간(학기) */
+/* 식당 퇴장 시각(분). 이 시각이 지나면 다음 밥을 보여 준다. 출처: 생활관 식당이용시간(학기) */
 static const int meal_end_weekday[MEAL_COUNT] = { 9 * 60, 14 * 60, 18 * 60 + 50 };
 static const int meal_end_weekend[MEAL_COUNT] = { 9 * 60, 13 * 60 + 30, 18 * 60 + 30 };
 

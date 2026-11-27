@@ -1,7 +1,7 @@
 /* daemon.c - 상주 모드: fork/setsid, sigaction, alarm + sigsuspend, atexit
  *
  * 다음 알림 시각까지 alarm()을 걸고 sigsuspend()로 잠든다.
- *   SIGALRM        : 알림 시각 -> 그 끼니 메뉴를 터미널에 보낸다
+ *   SIGALRM        : 알림 시각 -> 그 메뉴를 터미널에 보낸다
  *   SIGHUP         : 설정 파일(실행 파일 폴더의 dorm_menurc) 다시 읽기
  *   SIGINT/SIGTERM : pid 파일을 지우고 끝낸다 (atexit)
  */
