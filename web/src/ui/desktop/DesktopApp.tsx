@@ -5,7 +5,7 @@
 // 알림 규칙)는 휴대폰 화면과 같은 localStorage(store.ts)를 쓴다.
 //
 // 주소: ?tab=home|menu|alarm|allergy|my, 알림·공유 링크의 ?dorm=&date=&meal= (식단표 탭으로 연다)
-// 키보드(식단표 탭): ←/→ 하루, ↑/↓ 끼니
+// 키보드(식단표 탭): ←/→ 하루, ↑/↓ 아침·점심·저녁
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { MEALS, addDays, isDorm, isMeal, isYmd, kstToday, nextMeal, type Dorm, type Meal, type Ymd } from "@/lib/menu";
 import { I, ICON_DEFS, TAB_ICON } from "../icons";

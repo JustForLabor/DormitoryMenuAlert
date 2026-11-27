@@ -251,7 +251,7 @@ export function HoursSheet() {
         </div>
       ))}
       <p className="sub" style={{ marginTop: 10 }}>
-        앱의 &quot;지금·다음 끼니&quot;는 학기 퇴장 시각을 기준으로 넘어가요.
+        앱의 &quot;지금·다음 밥&quot;은 학기 퇴장 시각을 기준으로 넘어가요.
       </p>
     </>
   );
@@ -323,7 +323,7 @@ export function AppSheet() {
         <div>
           <h3>{pwa.ios ? "홈 화면에 SsalTech 추가" : "Android 앱 받기"}</h3>
           <p className="sd" style={{ marginTop: 2 }}>
-            {pwa.ios ? "주소창 없이 앱처럼 열리고, 본 식단은 오프라인에서도 보여요" : "정한 시각에 그 끼니 메뉴를 알림으로 받아요"}
+            {pwa.ios ? "주소창 없이 앱처럼 열리고, 본 식단은 오프라인에서도 보여요" : "정한 시각에 메뉴를 알림으로 받아요"}
           </p>
         </div>
       </div>
@@ -356,7 +356,7 @@ export function AppSheet() {
 export function CliSheet() {
   const rows = [
     ["dorm-menu", "오늘 식단"],
-    ["dorm-menu next", "다음 끼니"],
+    ["dorm-menu next", "다음 밥"],
     ["dorm-menu week", "이번 주 식단"],
     ["dorm-menu alarm add 내일 아침 21:00 kb", "매일 21:00에 내일 아침 메뉴를 터미널로 알림"],
   ] as const;
@@ -389,7 +389,7 @@ export function DataSheet() {
     ["cal", "식단", "생활관 홈페이지 식단표를 그대로 옮겨요. 서버는 식당·주만 받아 3~12시간 캐시해요"],
     ["lock", "알레르기·별점·알림 규칙", "이 기기에만 저장하고 서버로 보내지 않아요"],
     ["shield", "알레르기 표시", "식단표에 번호가 없어서 메뉴 이름으로 짐작해요. 소스·반죽 재료는 못 잡아요"],
-    ["bell", "알림", "Android 앱이 정한 시각에 그 끼니 메뉴를 받아 이 기기에서 띄워요"],
+    ["bell", "알림", "Android 앱이 정한 시각에 메뉴를 받아 이 기기에서 띄워요"],
   ];
   return (
     <>

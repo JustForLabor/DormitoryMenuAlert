@@ -81,7 +81,7 @@ export function MyView() {
           </span>
           <p>
             {on ? `메뉴 알림 ${on}개 받는 중` : "메뉴 알림 받기"}
-            <small>{app ? "앱을 닫아도 정한 시각에 그 끼니 메뉴가 와요" : "Android 앱에서 정한 시각에 울려요"}</small>
+            <small>{app ? "앱을 닫아도 정한 시각에 메뉴가 와요" : "Android 앱에서 정한 시각에 울려요"}</small>
           </p>
           <Icon k="chev" />
         </button>
@@ -128,7 +128,7 @@ export function MyView() {
         </button>
         <button className="lr press" onClick={() => sheet(<ShareSheet meal={shareMeal} toast={toast} onClose={closeSheet} />)}>
           <span className="sq"><Icon k="clip" /></span>
-          <p>식단 공유하기<small>{nday?.registered ? `${MEAL_NAME[nm.meal]} · ${shareMeal.dish}` : "내 식당의 다음 끼니"}</small></p>
+          <p>식단 공유하기<small>{nday?.registered ? `${MEAL_NAME[nm.meal]} · ${shareMeal.dish}` : "내 식당의 다음 밥"}</small></p>
           <Icon k="chev" />
         </button>
         {!app && !pwa.installed && (

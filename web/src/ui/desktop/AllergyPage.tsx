@@ -1,6 +1,6 @@
 "use client";
 
-// 알레르기 탭: 19종 고르기, 내 식당에서 앞으로 주의할 끼니.
+// 알레르기 탭: 19종 고르기, 내 식당에서 앞으로 주의할 메뉴.
 import { MEALS, MEAL_NAME, addDays, dayNum, dormOf, mainDish, mondayOf, WD, weekday, type Meal, type Ymd } from "@/lib/menu";
 import { Ico, Mascot } from "../kit";
 import { AL, hits, useWeeks, type Dish } from "../store";
@@ -70,17 +70,17 @@ function Upcoming() {
   return (
     <section className="sec st" style={st(2)}>
       <div className="sh">
-        <h2>앞으로 주의할 끼니</h2>
+        <h2>앞으로 주의할 메뉴</h2>
         <span>
           {dormOf(s.dorm).label} · 오늘부터 다음 주까지{rows.length ? ` · ${rows.length}끼` : ""}
         </span>
       </div>
       {!s.allergy.length ? (
-        <Calm text="위에서 알레르기를 고르면 주의할 끼니를 모아 보여 드려요" />
+        <Calm text="위에서 알레르기를 고르면 주의할 메뉴를 모아 보여 드려요" />
       ) : loading ? (
         <p className="none">생활관 홈페이지에서 받는 중…</p>
       ) : !rows.length ? (
-        <Calm text="오늘부터 다음 주까지 주의할 끼니가 없어요" />
+        <Calm text="오늘부터 다음 주까지 주의할 메뉴가 없어요" />
       ) : (
         <ul className="watch">
           {rows.map((r, i) => (

@@ -64,7 +64,7 @@ export const shortDate = (d: Ymd) => `${monthNum(d)}/${dayNum(d)}(${WD[weekday(d
 
 // ---------- 식당 이용시간 (사이트의 식당이용시간 표, 학기 기준) ----------
 
-/** 퇴장 시각(분). 이 시각이 지나면 다음 끼니로 넘어간다. */
+/** 퇴장 시각(분). 이 시각이 지나면 다음 밥으로 넘어간다. */
 const END_WEEKDAY: Record<Meal, number> = { breakfast: 9 * 60, lunch: 14 * 60, dinner: 18 * 60 + 50 };
 const END_WEEKEND: Record<Meal, number> = { breakfast: 9 * 60, lunch: 13 * 60 + 30, dinner: 18 * 60 + 30 };
 
@@ -75,7 +75,7 @@ export const HOURS: Record<"weekday" | "weekend", Record<Meal, string>> = {
 };
 export const hoursOf = (d: Ymd, m: Meal) => HOURS[isWeekend(d) ? "weekend" : "weekday"][m];
 
-/** 아직 끝나지 않은 가장 가까운 끼니 */
+/** 아직 끝나지 않은 가장 가까운 밥 */
 export function nextMeal(now = Date.now()): { date: Ymd; meal: Meal } {
   const today = kstToday(now);
   const minute = kstMinute(now);

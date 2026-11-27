@@ -20,7 +20,7 @@ export async function GET(req: Request) {
 
   try {
     const day = (await fetchWeek(dorm, monday)).days[(weekday(date) + 6) % 7];
-    const body = !day.registered ? "아직 식단이 올라오지 않았어요 (미등록)" : day.meals[meal] || "이 끼니는 운영하지 않아요";
+    const body = !day.registered ? "아직 식단이 올라오지 않았어요 (미등록)" : day.meals[meal] || "이때는 밥이 안 나와요";
     return Response.json(
       { title, body, registered: day.registered },
       { headers: { "Cache-Control": "public, max-age=60, s-maxage=600" } },

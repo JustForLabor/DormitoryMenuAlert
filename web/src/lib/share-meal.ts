@@ -1,4 +1,4 @@
-// 공유 랜딩·OG 이미지가 함께 쓰는 끼니 조회. 잘못된 주소만 거절하고, 식단이 없어도 제목은 만든다.
+// 공유 랜딩·OG 이미지가 함께 쓰는 메뉴 조회. 잘못된 주소만 거절하고, 식단이 없어도 제목은 만든다.
 import { MEAL_NAME, dormOf, isDorm, isMeal, isYmd, mainDish, menuItems, mondayOf, shortDate, weekday, type Dorm, type Meal, type Ymd } from "./menu";
 import { fetchWeek } from "./site";
 
@@ -41,7 +41,7 @@ export async function loadMealView(dorm: string, date: string, meal: string): Pr
     date,
     meal,
     title: dish ? `${head} - ${dish}` : head,
-    body: failed ? "식단을 불러오지 못했어요. SsalTech에서 다시 확인해 주세요." : !registered ? "아직 식단이 올라오지 않았어요." : text || "이 끼니는 운영하지 않아요.",
+    body: failed ? "식단을 불러오지 못했어요. SsalTech에서 다시 확인해 주세요." : !registered ? "아직 식단이 올라오지 않았어요." : text || "이때는 밥이 안 나와요.",
     dish,
     items,
     registered,

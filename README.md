@@ -25,7 +25,7 @@ dorm-menu : 서울과기대 생활관 식단 알리미
     dorm-menu                    오늘 식단
     dorm-menu week               이번 주 (월~일)
     dorm-menu month              이번 달 (올라온 주까지)
-    dorm-menu next               다음 끼니
+    dorm-menu next               다음 밥
     dorm-menu --dorm surim week  학사 지정
     dorm-menu -D 2026-11-25      다른 날짜 기준으로 보기
     dorm-menu -r today           저장된 식단 무시하고 새로 받기
@@ -72,7 +72,7 @@ dorm-menu : 서울과기대 생활관 식단 알리미
 
   알림 규칙
     "<오늘|내일> <아침|점심|저녁> <HH:MM>" 한 줄이 규칙 하나다.
-    매일 그 시각에 (그날 + 오늘/내일)의 그 끼니 메뉴를 알린다.
+    매일 그 시각에 (그날 + 오늘/내일)의 그 메뉴를 알린다.
       alarm add 내일 아침 21:00 surim   매일 밤 9시에 수림 내일 아침 메뉴
       alarm add 오늘 점심 10:30 kb      매일 10시 30분에 KB 오늘 점심 메뉴
     학사(kb|sunglim|surim)는 규칙마다 반드시 적는다.
@@ -107,7 +107,7 @@ dorm-menu : 서울과기대 생활관 식단 알리미
     글씨로 뜬다. 열린 터미널이 없으면 ~/.dorm_menu/daemon.log 에
     남긴다. GUI가 있는 Linux면 notify-send도 함께 띄운다.
 
-  next 명령은 "아직 끝나지 않은 가장 가까운 끼니"를 고른다.
+  next 명령은 "아직 끝나지 않은 가장 가까운 밥"을 고른다.
   끝나는 시각은 생활관 식당 이용시간(학기) 기준이다.
       평일  09:00 / 14:00 / 18:50
       주말  09:00 / 13:30 / 18:30
@@ -219,18 +219,18 @@ dorm-menu : 서울과기대 생활관 식단 알리미
                        다 올라온 주는 CDN에 12시간 캐시
     src/app/api/notify GET ?dorm&date&meal → 알림 제목·본문 한 끼
     src/app/s/[dorm]/[date]/[meal]
-                       공유 링크. 끼니마다 제목·OG 이미지를 만들고 사람은 앱으로 보낸다.
+                       공유 링크. 메뉴마다 제목·OG 이미지를 만들고 사람은 앱으로 보낸다.
                        story 는 인스타그램 스토리용 1080×1920 이미지.
     src/app/opengraph-image.tsx, robots.ts, sitemap.ts
                        검색·공유 미리보기. 첫 화면은 세 식당 오늘 식단을 서버에서 그린다.
     src/ui/share.tsx   카카오톡(JS SDK, NEXT_PUBLIC_KAKAO_JS_KEY)·페이스북·X·인스타그램·
                        링크 복사·더보기. Android 앱 안에서는 앱 공유 시트.
     src/ui/webpush.ts  이 브라우저로 알림 받기. 구독과 규칙을 hub 서버에 올린다.
-    public/sw.js       앱 셸 캐시, 푸시 알림 표시·누르면 그 끼니로 이동, 새 버전 토스트
+    public/sw.js       앱 셸 캐시, 푸시 알림 표시·누르면 그 메뉴로 이동, 새 버전 토스트
     src/ui/            휴대폰 화면 (오늘·식단·알림·알레르기·MY)
     src/ui/desktop/    데스크톱 화면: 휴대폰 화면과 같은 탭(오늘·식단표·알림·알레르기·MY)을
-                       왼쪽 메뉴로 옮겼다. 식단표는 주간·월간 표 + 고른 끼니 상세·별점,
-                       오늘은 다음 끼니 인사말·세 끼·세 식당 비교. 움직임은
+                       왼쪽 메뉴로 옮겼다. 식단표는 주간·월간 표 + 고른 메뉴 상세·별점,
+                       오늘은 다음 밥 인사말·세 끼·세 식당 비교. 움직임은
                        desktop.css 의 wld* 키프레임이며 동작 줄이기 설정이면 끈다.
                        폭 1024px 이상이면 데스크톱 화면, ?ui=mobile 또는
                        ?ui=desktop 으로 고를 수 있다. Android 앱 안은 늘 휴대폰 화면.

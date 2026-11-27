@@ -40,7 +40,7 @@ export function MyPage() {
           <span>식단을 보내고, 홈 화면에 둘 수 있어요</span>
         </div>
         <div className="acts">
-          <ShareButton meal={toShareMeal(s.dorm, nm.date, nm.meal, day?.meals[nm.meal] ?? "")} toast={toast} label="다음 끼니 공유" />
+          <ShareButton meal={toShareMeal(s.dorm, nm.date, nm.meal, day?.meals[nm.meal] ?? "")} toast={toast} label="다음 메뉴 공유" />
           {!pwa.installed && (
             <button type="button" className="cta sm" onClick={() => void installApp()}>
               {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
@@ -112,7 +112,7 @@ export function MyPage() {
         <section className="sec st" style={st(3)}>
           <div className="sh">
             <h2>내 기록</h2>
-            <span>식단표에서 지난 끼니를 고르면 별점을 남길 수 있어요</span>
+            <span>식단표에서 지난 메뉴를 고르면 별점을 남길 수 있어요</span>
           </div>
           {fav.length > 0 && (
             <div className="favs">

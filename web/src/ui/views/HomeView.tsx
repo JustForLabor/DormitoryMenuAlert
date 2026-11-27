@@ -1,7 +1,7 @@
 "use client";
 
-// 오늘 탭 (WasteLess 대학 홈 rHomeU를 생활관 식당용으로): 다음 끼니 인사, 굴러가는 메뉴 검색, 내 식당, 소식,
-// 바로가기, 오늘·내일 끼니 카드와 별점.
+// 오늘 탭 (WasteLess 대학 홈 rHomeU를 생활관 식당용으로): 다음 밥 인사, 굴러가는 메뉴 검색, 내 식당, 소식,
+// 바로가기, 오늘·내일 메뉴 카드와 별점.
 import { Fragment, useState } from "react";
 import { MEALS, MEAL_NAME, addDays, dormOf, hoursOf, kstMinute, kstToday, mainDish, menuItems, nextMeal, shortDate, type DayMenu, type Meal, type Ymd } from "@/lib/menu";
 import { useMobile } from "../app";
@@ -17,7 +17,7 @@ const startMin = (range: string) => {
   return h * 60 + m;
 };
 
-/** 끼니 상태: 끝남 / 지금(입장 중) / 다음 */
+/** 메뉴 상태: 끝남 / 지금(입장 중) / 다음 */
 function tagOf(date: Ymd, meal: Meal, next: { date: Ymd; meal: Meal }): string | undefined {
   if (date !== next.date) return date < next.date ? "끝" : undefined;
   const i = MEALS.indexOf(meal);
@@ -94,7 +94,7 @@ export function HomeView() {
   const banners: Banner[] = [
     {
       bg: "linear-gradient(120deg,#FFE1EA,#FFD2DE)",
-      t: ["정한 시각에", "그 끼니 메뉴를 알림으로"],
+      t: ["정한 시각에", "메뉴를 알림으로"],
       d: onAlarms ? `알림 ${onAlarms}개 켜져 있어요` : "Android 앱에서 매일 받아요",
       ill: "bell",
       size: 116,
@@ -190,7 +190,7 @@ export function HomeView() {
             </small>
           </h1>
           <button type="button" className="pbtn press" style={{ margin: "8px 18px 0", alignSelf: "flex-start" }} onClick={() => sheet(<ShareSheet meal={toShareMeal(s.dorm, nm.date, nm.meal, nday?.meals[nm.meal] ?? "")} toast={toast} onClose={closeSheet} />)}>
-            이 끼니 공유
+            이 메뉴 공유
           </button>
           <div className="peek">
             <Mascot />
@@ -221,7 +221,7 @@ export function HomeView() {
               <Icon k="tray" />
             </button>
             <button className="qb press st" style={st(5)} onClick={() => openMenu(nm.date)}>
-              <b>다음 끼니</b>
+              <b>다음 밥</b>
               <Icon k="bowl" />
             </button>
             <button className="qs press st" style={st(6)} onClick={() => go("alarm")}>
@@ -257,7 +257,7 @@ export function HomeView() {
             items={[
               { icon: "cal", label: "주간 식단", onClick: () => openMenu(today) },
               { icon: "chart", label: "월간 달력", onClick: () => openMenu(today, "m") },
-              { icon: "bowl", label: "다음 끼니", onClick: () => openMenu(nm.date) },
+              { icon: "bowl", label: "다음 밥", onClick: () => openMenu(nm.date) },
               { icon: "bell", label: "알림", onClick: () => go("alarm"), badge: onAlarms ? `${onAlarms}개` : undefined, tone: "r" },
               { icon: "clock", label: "운영시간", onClick: () => sheet(<HoursSheet />) },
               { icon: "shield", label: "알레르기", onClick: () => go("allergy") },
@@ -320,8 +320,8 @@ export function HomeView() {
               <Icon k="bell" />
             </span>
             <p>
-              {onAlarms ? `알림 ${onAlarms}개 받는 중` : "다음 끼니 알림 켜기"}
-              <small>매일 정한 시각에 그 끼니 메뉴를 보내 드려요</small>
+              {onAlarms ? `알림 ${onAlarms}개 받는 중` : "다음 밥 알림 켜기"}
+              <small>매일 정한 시각에 메뉴를 보내 드려요</small>
             </p>
             <Icon k="chev" />
           </button>

@@ -139,7 +139,7 @@ export function OnboardingView() {
       <>
         <h2 className="st">메뉴 알림을 받을까요?</h2>
         <p className="d st" style={st(1)}>
-          정한 시각에 그 끼니 메뉴를 보내 드려요. 알림 탭에서 시각·끼니·식당을 언제든 바꿀 수 있어요.
+          정한 시각에 메뉴를 보내 드려요. 알림 탭에서 시각·메뉴·식당을 언제든 바꿀 수 있어요.
         </p>
         <div className="orgs">
           {[true, false].map((v, i) => (

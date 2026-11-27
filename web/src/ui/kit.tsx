@@ -121,7 +121,7 @@ export function HitBox({ list, size = 26 }: { list: readonly Dish[]; size?: numb
   );
 }
 
-/** 끼니 한 줄 (홈 카드) */
+/** 메뉴 한 줄 (홈 카드) */
 export function CrRow({ meal, main, rest, time, tag }: { meal: Meal; main: string; rest: string; time: string; tag?: string }) {
   return (
     <div className="cr">

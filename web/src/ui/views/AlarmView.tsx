@@ -1,6 +1,6 @@
 "use client";
 
-// 알림 탭 (가운데 버튼): C 버전 `dorm-menu alarm add 날 끼니 HH:MM 학사` 규칙을 화면으로 만든 것.
+// 알림 탭 (가운데 버튼): C 버전 `dorm-menu alarm add 날 아침|점심|저녁 HH:MM 학사` 규칙을 화면으로 만든 것.
 // Android 앱 안에서는 규칙이 바뀔 때마다 앱에 넘겨 AlarmManager로 예약한다(app.tsx). 웹은 이 브라우저 알림으로 보낸다.
 import { useState } from "react";
 import { DORMS, MEALS, MEAL_NAME, addDays, dormOf, isWeekend, kstMinute, kstToday, shortDate, type Dorm, type Meal, type Ymd } from "@/lib/menu";
@@ -57,7 +57,7 @@ export function AlarmEditSheet({ alarm }: { alarm?: Alarm }) {
   return (
     <>
       <h3>{alarm ? "알림 고치기" : "알림 추가"}</h3>
-      <p className="sd">이 시각에 그 끼니 메뉴를 보내 드려요</p>
+      <p className="sd">이 시각에 메뉴를 보내 드려요</p>
       <p className="kid-h">언제</p>
       <div className="seg3">
         {(["all", "weekday", "weekend"] as const).map((r) => (
@@ -266,7 +266,7 @@ export function AlarmView() {
         </button>
       )}
       <p className="foot">
-        알림이 울릴 때 생활관 홈페이지에서 그 끼니 메뉴를 새로 받아 보여 줘요.
+        알림이 울릴 때 생활관 홈페이지에서 그 메뉴를 새로 받아 보여 줘요.
         <br />
         터미널 버전의 <code>dorm-menu alarm add 내일 아침 21:00 kb</code>와 같은 규칙이에요.
       </p>

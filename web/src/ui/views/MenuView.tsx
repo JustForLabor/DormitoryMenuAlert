@@ -1,6 +1,6 @@
 "use client";
 
-// 식단 탭 (WasteLess 식단표 rMenu + 대학 식당 rMenuU): 주간은 식당 알약·날짜 칩·끼니 카드, 월간은 달력.
+// 식단 탭 (WasteLess 식단표 rMenu + 대학 식당 rMenuU): 주간은 식당 알약·날짜 칩·메뉴 카드, 월간은 달력.
 import { useState, ViewTransition } from "react";
 import {
   DORMS,

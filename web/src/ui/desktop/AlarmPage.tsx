@@ -34,7 +34,7 @@ export function AlarmPage() {
       <header className="ph st" style={st(0)}>
         <div>
           <h1>알림</h1>
-          <p>정한 시각에 그 끼니 메뉴를 보내 드려요. 이 브라우저 알림 또는 Android 앱이 울려요.</p>
+          <p>정한 시각에 메뉴를 보내 드려요. 이 브라우저 알림 또는 Android 앱이 울려요.</p>
         </div>
       </header>
       <section className="ahero st" style={st(1)}>
@@ -173,7 +173,7 @@ function NewRule() {
             ["1", "내일"],
           ]}
         />
-        <Seg label="끼니" value={v.meal} onChange={(m: Meal) => set("meal", m)} items={MEALS.map((m) => [m, MEAL_NAME[m]])} />
+        <Seg label="메뉴" value={v.meal} onChange={(m: Meal) => set("meal", m)} items={MEALS.map((m) => [m, MEAL_NAME[m]])} />
       </div>
       <label className="fl">식당</label>
       <Seg label="식당" value={v.dorm} onChange={(d: Dorm) => set("dorm", d)} items={DORMS.map((d) => [d.id, d.name])} />

@@ -1,6 +1,6 @@
 "use client";
 
-// 식단표 탭: 식당 고르기, 주간(7일 × 세 끼)·월간 식단표, 고른 끼니 상세(메뉴·알레르기·별점).
+// 식단표 탭: 식당 고르기, 주간(7일 × 세 끼)·월간 식단표, 고른 메뉴 상세(메뉴·알레르기·별점).
 import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
   DORMS,
@@ -314,14 +314,14 @@ function DetailPanel() {
     if (n >= 4 && !fav.has(name)) toast(`${name} · 좋아하는 메뉴로 기억할게요 ♥`);
   };
   return (
-    <aside className="panel" aria-label="고른 끼니">
+    <aside className="panel" aria-label="고른 메뉴">
       <div className="ptop">
         <button className="arrow" onClick={() => setSel((x) => ({ ...x, date: addDays(x.date, -1) }))} aria-label="전날">
           ‹
         </button>
         <Seg
           className="meals3"
-          label="끼니"
+          label="메뉴"
           value={sel.meal}
           onChange={(meal: Meal) => setSel((x) => ({ ...x, meal }))}
           items={MEALS.map((m) => [m, MEAL_NAME[m]])}
@@ -355,13 +355,13 @@ function DetailPanel() {
               )}
             </p>
           </div>
-          <ShareButton icon label="이 끼니 공유" meal={toShareMeal(view, sel.date, sel.meal, day?.meals[sel.meal] ?? "")} toast={toast} />
+          <ShareButton icon label="이 메뉴 공유" meal={toShareMeal(view, sel.date, sel.meal, day?.meals[sel.meal] ?? "")} toast={toast} />
         </div>
         <div className="pbody">
           {day && !day.registered ? (
             <Empty text="이날은 생활관 홈페이지에 아직 식단이 없어요" />
           ) : !list.length ? (
-            <Empty text={loading ? "불러오는 중…" : !loadable(mondayOf(sel.date)) ? "아직 올라오지 않은 날이에요" : "이 끼니는 메뉴가 없어요"} />
+            <Empty text={loading ? "불러오는 중…" : !loadable(mondayOf(sel.date)) ? "아직 올라오지 않은 날이에요" : "이때는 메뉴가 없어요"} />
           ) : (
             <>
               {hl.length > 0 && (

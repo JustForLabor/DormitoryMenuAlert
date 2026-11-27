@@ -1,6 +1,6 @@
 "use client";
 
-// 오늘 탭: 다음 끼니 인사말, 메뉴 검색, 오늘 세 끼, 세 식당 비교, 알림·알레르기 안내.
+// 오늘 탭: 다음 밥 인사말, 메뉴 검색, 오늘 세 끼, 세 식당 비교, 알림·알레르기 안내.
 import { DORMS, MEALS, MEAL_NAME, addDays, dormOf, hoursOf, kstMinute, mainDish, mondayOf, nextMeal, type Dorm, type Meal, type Ymd } from "@/lib/menu";
 import { Ico, Mascot } from "../kit";
 import { ShareButton, toShareMeal } from "../share";
@@ -78,7 +78,7 @@ function Hello() {
             {label}
             {na ? " 식단이" : "은"}
             <br />
-            {na ? "아직 안 올라왔어요" : error ? "식단을 못 불러왔어요" : "쉬는 끼니예요"}
+            {na ? "아직 안 올라왔어요" : error ? "식단을 못 불러왔어요" : "밥이 안 나와요"}
           </h1>
         )}
         {main && !na && (
@@ -96,7 +96,7 @@ function Hello() {
           <button className="cta" onClick={() => open(nm.date, nm.meal, s.dorm)}>
             식단표에서 보기
           </button>
-          <ShareButton meal={toShareMeal(s.dorm, nm.date, nm.meal, text)} toast={toast} label="이 끼니 공유" small={false} />
+          <ShareButton meal={toShareMeal(s.dorm, nm.date, nm.meal, text)} toast={toast} label="이 메뉴 공유" small={false} />
           <button className="ghost" onClick={() => go("my")}>
             내 식당 바꾸기
           </button>
@@ -186,7 +186,7 @@ function Compare() {
     <section className="sec cmpsec st" style={st(5)}>
       <div className="sh">
         <h2>세 식당 {dayLabel(nm.date, today)} {MEAL_NAME[nm.meal]}</h2>
-        <span>같은 끼니 비교</span>
+        <span>식당별 메뉴 비교</span>
       </div>
       <div className="cmp">
         {DORMS.map((d, i) => (
@@ -225,7 +225,7 @@ function AlarmBanner() {
       <div>
         <h3>
           정한 시각에
-          <br />그 끼니 메뉴를 알림으로
+          <br />메뉴를 알림으로
         </h3>
         <p>{on ? `알림 규칙 ${on}개 · 이 브라우저나 Android 앱이 울려요` : "이 브라우저로도, Android 앱으로도 알림을 받을 수 있어요"}</p>
         <div className="acts">
@@ -260,7 +260,7 @@ function AllergyBanner() {
         <p>
           {s.allergy.length ? (
             <>
-              앞으로 주의 끼니 <b>{count}개</b> · {dormOf(s.dorm).name}
+              앞으로 주의 메뉴 <b>{count}개</b> · {dormOf(s.dorm).name}
             </>
           ) : (
             "알레르기를 고르면 식단표에 빨갛게 표시해요"

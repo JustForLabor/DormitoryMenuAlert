@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">SsalTech</string>
     <string name="channel_menu">식단 알림</string>
-    <string name="channel_menu_desc">정한 시각에 그 끼니 메뉴를 알려 줘요</string>
+    <string name="channel_menu_desc">정한 시각에 메뉴를 알려 줘요</string>
     <string name="channel_updates">앱 업데이트</string>
     <string name="channel_updates_desc">새 버전을 받는 동안 진행을 보여 줘요</string>
     <string name="update_title">새 버전 %1$s</string>

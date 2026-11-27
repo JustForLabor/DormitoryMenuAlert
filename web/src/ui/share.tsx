@@ -1,6 +1,6 @@
 "use client";
 
-// 끼니 공유. 카카오·페이스북·X·인스타그램·복사·더보기. Android 앱은 네이티브 공유 시트를 연다.
+// 메뉴 공유. 카카오·페이스북·X·인스타그램·복사·더보기. Android 앱은 네이티브 공유 시트를 연다.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { MEAL_NAME, dormOf, mainDish, shortDate, type Dorm, type Meal, type Ymd } from "@/lib/menu";

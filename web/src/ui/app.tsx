@@ -106,7 +106,7 @@ interface Boot {
   screen: Screen;
   sel: Ymd;
   dormSel: Dorm | null;
-  /** 알림을 눌러 들어온 끼니: 식단 탭에서 그 카드로 스크롤 */
+  /** 알림을 눌러 들어온 메뉴: 식단 탭에서 그 카드로 스크롤 */
   meal: Meal | null;
 }
 
@@ -122,7 +122,7 @@ function boot(): Boot {
   const dormSel = isDorm(dorm) ? dorm : null;
   const m = isMeal(meal) ? meal : null;
   if (!s) return { s, screen: "onb", sel, dormSel, meal: null };
-  // 알림·공유 링크(?date=&meal=)는 식단표에서 그 끼니를 연다.
+  // 알림·공유 링크(?date=&meal=)는 식단표에서 그 메뉴를 연다.
   const screen: Screen = tab && isTab(tab as Screen) ? (tab as Tab) : isYmd(date) ? "menu" : "home";
   return { s, screen, sel, dormSel, meal: m };
 }
@@ -346,7 +346,7 @@ export function MobileApp() {
     return () => window.clearTimeout(id);
   }, [cur, scrollToId]);
 
-  // 알림에서 들어오면(?tab=menu&date&dorm&meal) 그 주 식단이 그려진 뒤 그 끼니 카드로 간다.
+  // 알림에서 들어오면(?tab=menu&date&dorm&meal) 그 주 식단이 그려진 뒤 그 메뉴 카드로 간다.
   // 앱이 뒤에 있다가 알림으로 열리면 부드러운 스크롤이 멈출 수 있어 바로 옮긴다.
   useEffect(() => {
     if (init.screen !== "menu" || !init.meal) return;

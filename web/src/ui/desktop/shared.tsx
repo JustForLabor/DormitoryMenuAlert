@@ -44,7 +44,7 @@ export interface Desk {
   setMode: (m: Mode) => void;
   tab: DTab;
   go: (tab: DTab) => void;
-  /** 식단표 탭으로 가서 그 끼니를 고른다 */
+  /** 식단표 탭으로 가서 그 메뉴를 고른다 */
   open: (date: Ymd, meal: Meal, dorm?: Dorm) => void;
   toast: (msg: string) => void;
   /** 화면 좌표에서 작은 축하 조각을 터뜨린다 */
