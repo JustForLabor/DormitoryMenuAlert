@@ -34,6 +34,8 @@ interface Bridge {
   startUpdate?(): void;
   /** 즐겨찾기 알림(kind "fav" 규칙)을 이해하면 있다. 1.2.0 부터. */
   favAlarms?(): boolean;
+  /** "light" | "dark": 상태 표시줄·내비게이션 바 색을 웹 테마에 맞춘다. 1.2.3 부터. */
+  setTheme?(mode: string): void;
 }
 
 declare global {

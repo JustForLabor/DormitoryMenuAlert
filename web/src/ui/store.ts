@@ -113,6 +113,8 @@ export interface AppState {
   /** 즐겨찾기한 메뉴 이름. 없던 시절 상태는 loadState가 별점 4점 이상으로 채운다. */
   favs?: string[];
   favAlarm?: FavAlarm;
+  /** 화면 테마. 없으면 기기 설정을 따른다. layout.tsx 의 THEME_SCRIPT 가 첫 화면 전에 이 값을 읽는다. */
+  theme?: "light" | "dark";
 }
 
 const KEY = "ssaltech_v1";

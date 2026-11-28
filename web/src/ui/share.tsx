@@ -155,6 +155,28 @@ function mobileOS(): boolean {
   return /Android|iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
 }
 
+/**
+ * 인스타그램 앱의 공유 시트(받을 사람·대화방 목록)를 바로 연다. instagram://sharesheet?text= 는 문서에 없는 딥 링크다.
+ * 앱이 열려 이 페이지가 가려지면 true, 1.5초 안에 안 열리면(앱이 없으면) false.
+ * 사용자 활성화(Chrome 5초)가 남아 있어 false 뒤에도 navigator.share 를 띄울 수 있다.
+ */
+function openInstagramSharesheet(text: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const finish = (ok: boolean) => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("pagehide", onHide);
+      clearTimeout(timer);
+      resolve(ok);
+    };
+    const onVis = () => document.visibilityState === "hidden" && finish(true);
+    const onHide = () => finish(true);
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onHide);
+    const timer = setTimeout(() => finish(false), 1500);
+    location.href = `instagram://sharesheet?text=${encodeURIComponent(text)}`;
+  });
+}
+
 /** 인스타그램 DM: 링크를 보내면 받는 쪽에 미리보기 카드(opengraph-image)가 뜬다. */
 async function shareInstagramDm(meal: ShareMeal, toast: (m: string) => void) {
   const url = shareUrl(meal, "instagram_dm");
@@ -175,14 +197,22 @@ async function shareInstagramDm(meal: ShareMeal, toast: (m: string) => void) {
     track("share", { net: "instagram_dm", target: key });
     return;
   }
-  // 휴대폰 브라우저: 웹에서는 인스타그램 DM 을 바로 열 수 없어 공유 시트로 넘긴다. 사진 없이 링크만 보내야 DM 에 링크가 남는다.
-  if (mobileOS() && navigator.share) {
-    try {
-      await navigator.share({ title, text: title, url });
-      track("share", { net: "instagram_dm", target: key });
+  // 휴대폰 브라우저: 인스타그램 앱의 받을 사람 목록을 바로 연다. 링크는 미리 복사해 두어 다른 화면이 열려도 붙여 넣을 수 있게 한다.
+  if (mobileOS()) {
+    void copyText(url);
+    if (await openInstagramSharesheet(`${title}\n${url}`)) {
+      track("share", { net: "instagram_dm", target: key, via: "sharesheet" });
       return;
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") return;
+    }
+    // 인스타그램 앱이 없으면 공유 시트. 사진 없이 링크만 보내야 DM 에 링크가 남는다.
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: title, url });
+        track("share", { net: "instagram_dm", target: key });
+        return;
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+      }
     }
   }
   // 데스크톱: 웹에서 DM 에 글을 미리 채울 수는 없어, 받는 사람을 고르는 새 메시지 창을 열고 링크는 복사해 둔다.

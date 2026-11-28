@@ -31,6 +31,7 @@ import { hideSsrHome } from "./ssr";
 import { syncPushAlarms } from "./webpush";
 import { deliveredAlarms, loadState, saveState, type Alarm, type AppState } from "./store";
 import { Svg } from "./kit";
+import { useTheme } from "./theme";
 import { HomeView } from "./views/HomeView";
 import { MenuView } from "./views/MenuView";
 import { AlarmView } from "./views/AlarmView";
@@ -141,6 +142,7 @@ function urlFor(screen: Screen, step: number): string {
 export function MobileApp() {
   const [init] = useState(boot);
   const [S, setS] = useState<AppState | null>(init.s);
+  useTheme(S?.theme);
   const [cur, setCur] = useState<Screen>(init.screen);
   const [ob, setOb] = useState<Onboarding>(EMPTY_OB);
   const [sel, setSel] = useState<Ymd>(init.sel);

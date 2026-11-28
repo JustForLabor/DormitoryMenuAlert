@@ -37,6 +37,8 @@ export interface InstallState {
 }
 
 const STANDALONE = "(display-mode: standalone)";
+/** 이 기기에서 홈 화면 앱으로 처음 연 적이 있는지. */
+const PWA_SEEN = "ssaltech_pwa_seen";
 
 const isStandalone = () => window.matchMedia(STANDALONE).matches || navigator.standalone === true;
 const isIos = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -102,6 +104,16 @@ export function useInstall(onInstalled: () => void): InstallState {
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onAppInstalled);
     mq.addEventListener("change", onMode);
+    // 홈 화면 앱으로 처음 연 기기를 한 번 센다. iOS 는 설치 이벤트가 없어 이것만 잡힌다.
+    // 이 이벤트가 생기기 전에 설치한 기기는 다음 실행 때 한 번 잡힌다.
+    if (isStandalone() && !window.SsalTechNative) {
+      try {
+        if (!localStorage.getItem(PWA_SEEN)) {
+          localStorage.setItem(PWA_SEEN, "1");
+          track("pwa_first_open", { os: isIos() ? "ios" : "other" });
+        }
+      } catch {}
+    }
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onAppInstalled);

@@ -5,7 +5,8 @@ import { dormOf, nextMeal, MEAL_NAME } from "@/lib/menu";
 import { useDay } from "../store";
 import { ShareSheet, toShareMeal } from "../share";
 import { useMobile } from "../app";
-import { CountUp } from "../motion";
+import { CountUp, haptic } from "../motion";
+import { THEME_CHOICES } from "../theme";
 import { APK_URL, bridge, useAppUpdate, type AppUpdate } from "../native";
 import { AL, favorites, ratingCount } from "../store";
 import { Ico, Icon, Mascot, st } from "../kit";
@@ -13,7 +14,7 @@ import { AppSheet, CliSheet, DORM_ICON, DataSheet, DormSheet, HoursSheet, InboxS
 import { AllergySheet } from "./AllergyView";
 
 export function MyView() {
-  const { s, sheet, closeSheet, go, pwa, toast } = useMobile();
+  const { s, sheet, closeSheet, go, pwa, toast, update } = useMobile();
   const dorm = dormOf(s.dorm);
   const nm = nextMeal();
   const { day: nday } = useDay(s.dorm, nm.date);
@@ -86,6 +87,28 @@ export function MyView() {
           <Icon k="chev" />
         </button>
         <div style={{ height: 10 }}></div>
+      </div>
+      <div className="lc st" style={st(2)}>
+        <h3>화면</h3>
+        <div className="seg3" style={{ margin: "4px 0 14px" }} role="radiogroup" aria-label="화면 테마">
+          {THEME_CHOICES.map(([t, name]) => (
+            <button
+              key={name}
+              role="radio"
+              aria-checked={s.theme === t}
+              className={s.theme === t ? "on" : ""}
+              onClick={() => {
+                haptic("select");
+                update((x) => {
+                  if (t) x.theme = t;
+                  else delete x.theme;
+                });
+              }}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="lc st" style={st(2)}>
         <h3>내 정보</h3>

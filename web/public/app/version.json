@@ -1,12 +1,12 @@
 {
-  "versionCode": 6,
-  "versionName": "1.2.2",
+  "versionCode": 7,
+  "versionName": "1.2.3",
   "url": "https://dorm.ybkim.pe.kr/download/android?src=update",
-  "sha256": "12a5aed9749e849345faa03a3c1d7accab26f55d4994447c8beb4da90a9ef7b6",
-  "size": 134944,
+  "sha256": "86f98884380c9e1451c1e1657d32f307c5d91a73186beca94427d3194fd90ef7",
+  "size": 135800,
   "notes": [
-    "식당 입장 마감 몇 분 전에 알림을 받을 수 있어요.",
-    "그날 그 밥이 안 나오면 마감 알림을 보내지 않아요."
+    "다크 모드를 쓸 수 있어요. MY → 화면에서 기기 설정·라이트·다크를 고르세요.",
+    "식당 입장 마감 몇 분 전에 알림을 받을 수 있어요."
   ],
   "published": "2026-11-28"
 }

@@ -10,7 +10,8 @@ import { CountUp } from "../motion";
 import { APK_URL } from "../native";
 import { DORM_ICON, REPO_URL } from "../sheets";
 import { favorites, ratingCount } from "../store";
-import { st, useDesk } from "./shared";
+import { THEME_CHOICES } from "../theme";
+import { Seg, st, useDesk } from "./shared";
 
 export function MyPage() {
   const { s, update, setView, toast, reset, pwa } = useDesk();
@@ -48,6 +49,24 @@ export function MyPage() {
           )}
           <a className="cta sm" href={APK_URL} download>Android 앱 받기</a>
         </div>
+      </section>
+
+      <section className="sec st" style={st(1)}>
+        <div className="sh">
+          <h2>화면</h2>
+          <span>기기 설정을 따르거나 라이트·다크를 고를 수 있어요</span>
+        </div>
+        <Seg
+          label="화면 테마"
+          value={s.theme ?? "system"}
+          onChange={(v: string) =>
+            update((x) => {
+              if (v === "light" || v === "dark") x.theme = v;
+              else delete x.theme;
+            })
+          }
+          items={THEME_CHOICES.map(([t, name]) => [t ?? "system", name])}
+        />
       </section>
 
       <section className="sec st" style={st(1)}>

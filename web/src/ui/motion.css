@@ -151,3 +151,9 @@
 @media (prefers-reduced-motion: reduce) {
   .wlm .sheet, .wlm .dim, .wlm .ptr-body, .wlm .ptr-ind, .wlm .splash, .wlm .tween-w { transition: none !important; }
 }
+
+/* 다크 모드 */
+html[data-theme="dark"] .wlm .splash { background: radial-gradient(600px 380px at 30% 0%, #2A1A12 0, transparent 60%), #0F1115; }
+html[data-theme="dark"] .wlm .tabs .ctr.on .fab { box-shadow: 0 0 0 5px var(--card), 0 12px 26px rgba(255,79,123,.5); }
+html[data-theme="dark"]:active-view-transition-type(wl-inner) .wlm .scr.on .tbar { background: #0F1115; }
+html[data-theme="dark"]:active-view-transition-type(wl-inner) .wlm .scr.on .tbar.w { background: var(--card); }

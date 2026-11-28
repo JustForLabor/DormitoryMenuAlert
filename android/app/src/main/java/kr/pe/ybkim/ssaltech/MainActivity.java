@@ -6,8 +6,10 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowInsetsController;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -38,7 +40,7 @@ public class MainActivity extends Activity {
         Alarms.ensureChannel(this);
         web = new WebView(this);
         if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true);
-        web.setBackgroundColor(Color.parseColor("#F3F4F7"));
+        web.setBackgroundColor(getColor(R.color.bg));
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -67,6 +69,25 @@ public class MainActivity extends Activity {
         new Thread(() -> Alarms.scheduleAll(getApplicationContext()), "ssaltech-schedule").start();
         Updater.attach(this);
         Updater.onLaunch(this);
+    }
+
+    /** 웹 테마(native.ts setTheme)에 맞춰 상태 표시줄·내비게이션 바와 WebView 바탕색을 바꾼다. */
+    @SuppressWarnings("deprecation")
+    void applyTheme(boolean dark) {
+        int bg = Color.parseColor(dark ? "#0F1115" : "#F3F4F7");
+        getWindow().setStatusBarColor(bg);
+        getWindow().setNavigationBarColor(dark ? bg : Color.WHITE);
+        web.setBackgroundColor(bg);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            int light = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+            WindowInsetsController c = getWindow().getInsetsController();
+            if (c != null) c.setSystemBarsAppearance(dark ? 0 : light, light);
+        } else {
+            View d = getWindow().getDecorView();
+            int light = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            int f = d.getSystemUiVisibility();
+            d.setSystemUiVisibility(dark ? f & ~light : f | light);
+        }
     }
 
     private static String urlFor(Intent intent) {

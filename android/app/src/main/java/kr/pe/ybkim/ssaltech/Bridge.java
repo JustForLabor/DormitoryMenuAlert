@@ -194,6 +194,13 @@ final class Bridge {
         return true;
     }
 
+    /** 웹 테마 "light" | "dark". 시스템 바 색을 맞춘다(web/src/ui/theme.ts). */
+    @JavascriptInterface
+    public void setTheme(String mode) {
+        final boolean dark = "dark".equals(mode);
+        activity.runOnUiThread(() -> activity.applyTheme(dark));
+    }
+
     /** 규칙 하나를 지금 한 번 울린다(알림 탭의 "시험 알림"). */
     @JavascriptInterface
     public void test(String json) {

@@ -20,6 +20,7 @@ import { AllergyPage } from "./AllergyPage";
 import { HomePage } from "./HomePage";
 import { MenuPage } from "./MenuPage";
 import { MyPage } from "./MyPage";
+import { useTheme } from "../theme";
 import { DeskCtx, useNow, useThumb, type Desk, type DTab, type Mode, type Sel } from "./shared";
 
 const DEFAULT_STATE: AppState = { dorm: "kb", allergy: [], rates: {}, alarms: [] };
@@ -52,6 +53,7 @@ const BURST = Array.from({ length: 14 }, (_, i) => {
 export function DesktopApp() {
   const [boot] = useState(bootFromUrl);
   const [s, setS] = useState<AppState>(() => loadState() ?? DEFAULT_STATE);
+  useTheme(s.theme);
   const update = useCallback((fn: (x: AppState) => void) => {
     setS((prev) => {
       const x: AppState = structuredClone(prev);
