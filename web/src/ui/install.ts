@@ -18,6 +18,8 @@ declare global {
   interface Navigator {
     /** iOS Safari: 홈 화면에서 열었으면 true. */
     standalone?: boolean;
+    /** Chrome(Android 80+, 데스크톱 140+): manifest related_applications 중 이 기기에 설치된 것. */
+    getInstalledRelatedApps?: () => Promise<{ platform: string; id?: string; url?: string; version?: string }[]>;
   }
 }
 
@@ -26,6 +28,11 @@ export type InstallResult = "accepted" | "dismissed" | "manual";
 export interface InstallState {
   /** 설치한 앱(standalone)으로 실행 중. */
   installed: boolean;
+  /**
+   * 이 기기에 앱이 있다: standalone 으로 실행 중이거나, 브라우저 탭이어도 Chrome 이 설치된
+   * Android 앱(asset_statements 로 이 사이트와 묶인 1.2.5+)이나 홈 화면 앱을 찾았다. 앱 받기 안내를 숨기는 기준.
+   */
+  hasApp: boolean;
   /** iOS/iPadOS 는 공유 → 홈 화면에 추가로만 설치된다. */
   ios: boolean;
   /** 브라우저 설치 창이 있으면 띄우고, 없으면 "manual". */
@@ -47,6 +54,15 @@ export function useInstall(onInstalled: () => void): InstallState {
   const [installed, setInstalled] = useState(isStandalone);
   const [ios] = useState(isIos);
   const [updateReady, setUpdateReady] = useState(false);
+  const [related, setRelated] = useState(false);
+
+  useEffect(() => {
+    navigator
+      .getInstalledRelatedApps?.()
+      .then((apps) => setRelated(apps.length > 0))
+      .catch(() => {});
+  }, []);
+
   const deferred = useRef<BeforeInstallPromptEvent | null>(null);
   const onInstalledRef = useRef(onInstalled);
   const reloadOnControl = useRef(false);
@@ -137,8 +153,9 @@ export function useInstall(onInstalled: () => void): InstallState {
     void navigator.serviceWorker.getRegistration().then((reg) => reg?.waiting?.postMessage({ type: "skipWaiting" }));
   }, []);
 
+  const hasApp = installed || related;
   return useMemo(
-    () => ({ installed, ios, install, updateReady, applyUpdate }),
-    [installed, ios, install, updateReady, applyUpdate],
+    () => ({ installed, hasApp, ios, install, updateReady, applyUpdate }),
+    [installed, hasApp, ios, install, updateReady, applyUpdate],
   );
 }

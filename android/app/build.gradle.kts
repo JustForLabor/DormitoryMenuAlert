@@ -21,8 +21,8 @@ android {
         applicationId = "kr.pe.ybkim.ssaltech"
         minSdk = 26
         targetSdk = 34
-        versionCode = (findProperty("versionCode") as String?)?.toInt() ?: 8
-        versionName = (findProperty("versionName") as String?) ?: "1.2.4"
+        versionCode = (findProperty("versionCode") as String?)?.toInt() ?: 9
+        versionName = (findProperty("versionName") as String?) ?: "1.2.5"
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
         manifestPlaceholders["cleartext"] = baseUrl.startsWith("http://").toString()
     }

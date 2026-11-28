@@ -154,7 +154,7 @@ export function MyView() {
           <p>식단 공유하기<small>{nday?.registered ? `${MEAL_NAME[nm.meal]} · ${shareMeal.dish}` : "내 식당의 다음 밥"}</small></p>
           <Icon k="chev" />
         </button>
-        {!app && !pwa.installed && (
+        {!app && !pwa.hasApp && (
           <button className="lr press" onClick={installApp}>
             <span className="sq">
               {/* eslint-disable-next-line @next/next/no-img-element -- static app icon */}
@@ -211,7 +211,7 @@ export function MyView() {
         <a href={REPO_URL} target="_blank" rel="noreferrer">
           소스 코드
         </a>
-        {!app && !pwa.installed && (
+        {!app && !pwa.hasApp && (
           <>
             {" · "}
             <a href={APK_URL} download>

@@ -229,7 +229,7 @@ function AlarmBanner() {
         </h3>
         <p>{on ? `알림 규칙 ${on}개 · 이 브라우저나 Android 앱이 울려요` : "이 브라우저로도, Android 앱으로도 알림을 받을 수 있어요"}</p>
         <div className="acts">
-          {!pwa.installed && (
+          {!pwa.hasApp && (
             <a className="cta sm" href={APK_URL} download>
               Android 앱 받기
             </a>

@@ -37,12 +37,12 @@ export function MyPage() {
       </header>
       <section className="sec st" style={st(1)}>
         <div className="sh">
-          <h2>{pwa.installed ? "공유" : "공유 · 설치"}</h2>
-          <span>{pwa.installed ? "다음 메뉴를 친구에게 보내요" : "식단을 보내고, 홈 화면에 둘 수 있어요"}</span>
+          <h2>{pwa.hasApp ? "공유" : "공유 · 설치"}</h2>
+          <span>{pwa.hasApp ? "다음 메뉴를 친구에게 보내요" : "식단을 보내고, 홈 화면에 둘 수 있어요"}</span>
         </div>
         <div className="acts">
           <ShareButton meal={toShareMeal(s.dorm, nm.date, nm.meal, day?.meals[nm.meal] ?? "")} toast={toast} label="다음 메뉴 공유" />
-          {!pwa.installed && (
+          {!pwa.hasApp && (
             <>
               <button type="button" className="cta sm" onClick={() => void installApp()}>
                 {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
@@ -194,7 +194,7 @@ export function MyPage() {
               <h2>앱·정보</h2>
             </div>
             <ul className="links">
-              {!pwa.installed && (
+              {!pwa.hasApp && (
                 <li>
                   <a href={APK_URL} download>
                     Android 앱 받기 (APK)<span>→</span>

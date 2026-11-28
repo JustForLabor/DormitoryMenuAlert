@@ -186,10 +186,10 @@ export function DesktopApp() {
           <span className="sp" />
           <div className="promo">
             <Mascot className="pm" />
-            <b>{pwa.installed ? "앱으로 보고 있어요" : "홈 화면에 추가하기"}</b>
-            <p>{pwa.installed ? "이 브라우저로 알림도 받을 수 있어요" : "앱처럼 열고, 알림도 이 브라우저로"}</p>
+            <b>{pwa.installed ? "앱으로 보고 있어요" : pwa.hasApp ? "앱이 설치돼 있어요" : "홈 화면에 추가하기"}</b>
+            <p>{pwa.installed ? "이 브라우저로 알림도 받을 수 있어요" : pwa.hasApp ? "설치한 앱에서 열어도 같은 식단이에요" : "앱처럼 열고, 알림도 이 브라우저로"}</p>
             <div className="stack">
-              {!pwa.installed && (
+              {!pwa.hasApp && (
                 <>
                   <button type="button" className="cta sm" onClick={() => void installApp()}>
                     {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}

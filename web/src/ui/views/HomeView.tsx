@@ -65,8 +65,8 @@ export function HomeView() {
   const nday = dayOf(nm.date);
   const curWeek = entries[1];
   const notices = useNotices(s.dorm);
-  /** Android 앱 안이거나 홈 화면에 설치한 앱으로 열었으면 앱 받기 안내를 숨긴다. */
-  const installed = !!bridge() || pwa.installed;
+  /** Android 앱 안이거나, 이 기기에 앱(Android 앱·홈 화면 앱)이 설치돼 있으면 앱 받기 안내를 숨긴다. */
+  const installed = !!bridge() || pwa.hasApp;
   const nmLabel = `${nm.date === today ? "오늘" : "내일"} ${MEAL_NAME[nm.meal]}`;
   const pick = nday?.registered ? mainDish(nday.meals[nm.meal]) : "";
   const upcoming = days.filter((d) => d.date >= today);

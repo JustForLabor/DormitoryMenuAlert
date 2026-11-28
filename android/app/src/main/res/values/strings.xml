@@ -14,4 +14,5 @@
     <string name="notif_group">식단 알림</string>
     <string name="offline">인터넷에 연결되지 않았어요. 연결되면 다시 불러올게요.</string>
     <string name="share_image_failed">공유할 이미지를 받지 못했어요. 잠시 뒤에 다시 해 주세요.</string>
+    <string name="asset_statements" translatable="false">[{\"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://dorm.ybkim.pe.kr\"}}]</string>
 </resources>

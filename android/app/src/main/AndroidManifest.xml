@@ -24,6 +24,9 @@
         android:theme="@style/Theme.SsalTech"
         android:usesCleartextTraffic="${cleartext}">
 
+        <!-- 이 사이트(Chrome)의 navigator.getInstalledRelatedApps() 가 이 앱이 설치된 걸 알아보게 한다. -->
+        <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
