@@ -53,9 +53,9 @@
   ::view-transition-group(.wl-org-in), ::view-transition-group(.wl-org-out) { overflow: clip; }
 }
 
-/* Bottom tabs: fade through. */
+/* Bottom tabs: fade through. No scale: a shrunken snapshot shows the screen's edges and corners against the page behind. */
 ::view-transition-old(.wl-tab-out) { animation: 90ms cubic-bezier(.4,0,1,1) both wl-fade-out; }
-::view-transition-new(.wl-tab-in) { animation: 210ms cubic-bezier(0,0,.2,1) 90ms both wl-fade-in, 210ms cubic-bezier(0,0,.2,1) 90ms both wl-scale-in; }
+::view-transition-new(.wl-tab-in) { animation: 210ms cubic-bezier(0,0,.2,1) 90ms both wl-fade-in; }
 
 /* Deeper screen / next step: shared axis X forward. */
 ::view-transition-old(.wl-push-out) { animation: 90ms cubic-bezier(.4,0,1,1) both wl-fade-out, 300ms cubic-bezier(.4,0,.2,1) both wl-x-to-left; }

@@ -10,6 +10,13 @@
 .wlm svg{display:block}
 .wlm .stage{min-height:100dvh;display:flex;justify-content:center;align-items:center;gap:56px}
 .wlm .phone{position:relative;width:100%;max-width:430px;height:100dvh;background:var(--bg);overflow:hidden}
+/* 휴대폰·태블릿: 앱을 화면에 고정한다. 문서가 스크롤·바운스되지 않으니 모서리가 드러나지 않고,
+   dvh 를 잘못 계산하는 앱 안 브라우저(인스타그램 등)에서도 보이는 영역에 정확히 맞는다. */
+@media (max-width:1023.98px){.wlm{position:fixed;inset:0;min-height:0;overflow:hidden}
+.wlm .stage{min-height:0;height:100%}
+.wlm .phone{height:100%}
+}
+html:has(.wlm){-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* 넓은 화면에서 ?ui=mobile 로 볼 때만 휴대폰 틀을 씌운다 */
 @media (min-width:1024px){.wlm{background:radial-gradient(1200px 600px at 20% 0%,#FFE9DA 0,transparent 60%),radial-gradient(900px 600px at 100% 100%,#E6E2FF 0,transparent 60%),#EEF0F4}
 .wlm .stage{padding:24px}
