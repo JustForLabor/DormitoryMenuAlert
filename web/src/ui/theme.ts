@@ -2,7 +2,7 @@
 
 // 화면 테마를 <html>에 걸고, 기기 설정을 따를 때는 설정이 바뀌면 바로 따라간다.
 // Android 앱(1.2.3+)에는 상태 표시줄·내비게이션 바 색도 맞추라고 알린다.
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { THEME_BG } from "@/lib/theme";
 import { bridge } from "./native";
 import type { AppState } from "./store";
@@ -28,6 +28,18 @@ export function useTheme(theme: AppState["theme"]) {
     mq.addEventListener("change", run);
     return () => mq.removeEventListener("change", run);
   }, [theme]);
+}
+
+const subscribeDark = (cb: () => void) => {
+  const mq = matchMedia(DARK);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+};
+
+/** 지금 다크로 보이는지: 직접 고른 테마, 아니면 기기 설정. */
+export function useDark(theme: AppState["theme"]): boolean {
+  const system = useSyncExternalStore(subscribeDark, () => matchMedia(DARK).matches, () => false);
+  return theme ? theme === "dark" : system;
 }
 
 export const THEME_CHOICES = [
