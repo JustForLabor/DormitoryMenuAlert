@@ -489,7 +489,8 @@
   .wld .srch { width: 280px; }
 }
 @media (max-width: 1180px) {
-  .wld .split { grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; }
+  /* iPad 가로·iPad Pro 세로: 주간표를 전체 폭으로 쓰고 식사 상세는 아래로 */
+  .wld .split { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .wld .board { padding: 18px 14px 14px; }
   .wld .seg.dorms small { display: none; }
   .wld .seg.dorms button { height: 52px; }

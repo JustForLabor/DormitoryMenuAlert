@@ -210,7 +210,18 @@ function Row({ meal, dates, byDate, fav, loading }: { meal: Meal; dates: Ymd[]; 
         const hit = hits(list, s.allergy).length > 0;
         const cls = ["cell", on && "on", d === today && "today", d < today && "past", day && !day.registered && "na", hit && "hit"].filter(Boolean).join(" ");
         return (
-          <button key={d} className={cls} style={st(i + MEALS.indexOf(meal) * 2)} role="gridcell" aria-selected={on} onClick={() => setSel({ date: d, meal })}>
+          <button
+            key={d}
+            className={cls}
+            style={st(i + MEALS.indexOf(meal) * 2)}
+            role="gridcell"
+            aria-selected={on}
+            onClick={() => {
+              setSel({ date: d, meal });
+              // 1180px 이하(iPad)에서는 상세 패널이 표 아래로 내려가니 보이게 스크롤한다 (desktop.css 의 같은 폭 규칙).
+              if (matchMedia("(max-width: 1180px)").matches) document.querySelector(".wld .split > .panel")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            }}
+          >
             {day && !day.registered ? (
               <span className="empty">미등록</span>
             ) : list.length ? (

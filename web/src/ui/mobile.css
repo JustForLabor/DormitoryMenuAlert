@@ -10,10 +10,10 @@
 .wlm svg{display:block}
 .wlm .stage{min-height:100dvh;display:flex;justify-content:center;align-items:center;gap:56px}
 .wlm .phone{position:relative;width:100%;max-width:430px;height:100dvh;background:var(--bg);overflow:hidden}
-@media (min-width:760px){.wlm{background:radial-gradient(1200px 600px at 20% 0%,#FFE9DA 0,transparent 60%),radial-gradient(900px 600px at 100% 100%,#E6E2FF 0,transparent 60%),#EEF0F4}
+/* 넓은 화면에서 ?ui=mobile 로 볼 때만 휴대폰 틀을 씌운다 */
+@media (min-width:1024px){.wlm{background:radial-gradient(1200px 600px at 20% 0%,#FFE9DA 0,transparent 60%),radial-gradient(900px 600px at 100% 100%,#E6E2FF 0,transparent 60%),#EEF0F4}
 .wlm .stage{padding:24px}
 .wlm .phone{height:min(880px,calc(100vh - 48px));border-radius:44px;box-shadow:0 0 0 10px #17191E,0 0 0 11px #3a3d45,0 40px 80px rgba(23,25,30,.28)}
-
 }
 .wlm .scr{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:110px;display:none;scrollbar-width:none;overscroll-behavior:contain}
 .wlm .scr::-webkit-scrollbar{display:none}
@@ -525,7 +525,7 @@
 
 /* 다크 모드: html[data-theme="dark"] 일 때만. 바탕 #0F1115 는 theme-color·Android 시스템 바와 같다. */
 html[data-theme="dark"] .wlm{--bg:#0F1115;--card:#181B21;--ink:#ECEEF2;--ink2:#B4B9C3;--ink3:#7E848F;--line:#2A2E36;--soft:#20242B;--sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.28);background:#0F1115}
-@media (min-width:760px){html[data-theme="dark"] .wlm{background:radial-gradient(1200px 600px at 20% 0%,#2A1A12 0,transparent 60%),radial-gradient(900px 600px at 100% 100%,#1E1A33 0,transparent 60%),#0B0D10}}
+@media (min-width:1024px){html[data-theme="dark"] .wlm{background:radial-gradient(1200px 600px at 20% 0%,#2A1A12 0,transparent 60%),radial-gradient(900px 600px at 100% 100%,#1E1A33 0,transparent 60%),#0B0D10}}
 /* :is() 는 안에서 가장 센 선택자의 우선순위를 통째로 쓴다. 그래서 우선순위가 같은 것끼리만 묶어, 밝은 화면 규칙보다 한 단만 세게 한다
    (그래야 .on 같은 상태 규칙을 덮지 않는다). */
 /* 흰 카드 → 카드색 */
@@ -623,3 +623,8 @@ html[data-theme="dark"] .wlm .sl{--ink:#17191E;--ink2:#555C68;--ink3:#7A808B;col
 html[data-theme="dark"] .wlm [fill="#17191E" i]{fill:var(--ink)}
 html[data-theme="dark"] .wlm [stroke="#17191E" i]{stroke:var(--ink)}
 html[data-theme="dark"] .wlm :is(.sico-copy,.sico-more,.sico-back){background:#2A2E36}
+/* 태블릿(iPad 세로 등): 화면을 가득 채우고 내용·탭바·시트는 가운데 680px 단으로 모은다 */
+@media (min-width:600px) and (max-width:1023.98px){.wlm .phone{max-width:none}
+.wlm .scr,.wlm .tabs{padding-inline:max(0px,calc(50% - 340px))}
+.wlm .sheet{left:max(0px,calc(50% - 340px));right:max(0px,calc(50% - 340px))}
+}
