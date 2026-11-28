@@ -132,7 +132,8 @@ async function shareKakao(meal: ShareMeal, toast: (m: string) => void) {
       content: {
         title,
         description: meal.text || "서울과기대 생활관 식단",
-        imageUrl: `https://dorm.ybkim.pe.kr/s/${meal.dorm}/${meal.date}/${meal.meal}/opengraph-image`,
+        // ?v= 는 opengraph-image.tsx 의 판 번호. 카카오톡은 같은 주소의 이미지를 오래 캐시한다.
+        imageUrl: `https://dorm.ybkim.pe.kr/s/${meal.dorm}/${meal.date}/${meal.meal}/opengraph-image?v=2`,
         // 크기를 안 주면 카카오톡이 정사각형으로 잘라 가운데만 보인다.
         imageWidth: 1200,
         imageHeight: 630,

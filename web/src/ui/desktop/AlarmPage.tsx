@@ -9,8 +9,8 @@ import { APK_URL } from "../native";
 import { DORM_ICON } from "../sheets";
 import { WebPushCard } from "../WebPushCard";
 import { FavAlarmCard } from "../FavAlarmCard";
-import { deliveredAlarms, type Alarm, type Repeat } from "../store";
-import { PRESETS, newId, nextFire, ruleText } from "../views/AlarmView";
+import { BEFORE_CHOICES, BEFORE_MAX, alarmTimeOn, closeAlarmTime, deliveredAlarms, type Alarm, type Repeat } from "../store";
+import { PRESETS, clampBefore, closeTimesText, newId, nextFire, ruleText, ruleWhen, sameKind } from "../views/AlarmView";
 import { Seg, dayLabel, st, useDesk } from "./shared";
 
 const REPEATS: readonly (readonly [Repeat, string])[] = [
@@ -19,8 +19,7 @@ const REPEATS: readonly (readonly [Repeat, string])[] = [
   ["weekend", "주말"],
 ];
 
-const sameRule = (a: Pick<Alarm, "offset" | "meal" | "time" | "dorm">, b: Pick<Alarm, "offset" | "meal" | "time" | "dorm">) =>
-  a.offset === b.offset && a.meal === b.meal && a.time === b.time && a.dorm === b.dorm;
+const sameRule = (a: Omit<Alarm, "id" | "on">, b: Omit<Alarm, "id" | "on">) => a.dorm === b.dorm && sameKind(a, b);
 
 export function AlarmPage() {
   const { s, update, today, toast } = useDesk();
@@ -29,7 +28,8 @@ export function AlarmPage() {
   const next = on
     .map((a) => ({ a, d: nextFire(a, today) }))
     .filter((x): x is { a: Alarm; d: string } => x.d !== null)
-    .sort((x, y) => (x.d === y.d ? x.a.time.localeCompare(y.a.time) : x.d.localeCompare(y.d)))[0];
+    .map((x) => ({ ...x, t: alarmTimeOn(x.a, x.d) }))
+    .sort((x, y) => (x.d === y.d ? x.t.localeCompare(y.t) : x.d.localeCompare(y.d)))[0];
   return (
     <>
       <header className="ph st" style={st(0)}>
@@ -44,7 +44,7 @@ export function AlarmPage() {
           {next ? (
             <>
               <h2>
-                {dayLabel(next.d, today)} {next.a.time}
+                {dayLabel(next.d, today)} {next.t}
               </h2>
               <p>
                 {ruleText(next.a)} · {dormOf(next.a.dorm).label}
@@ -95,7 +95,7 @@ function Rules() {
               <li key={a.id} className={a.on ? "" : "off"} style={st(i)}>
                 <Ico k={DORM_ICON[a.dorm]} size={40} />
                 <span className="rt">
-                  <b>{a.time}</b>
+                  <b>{ruleWhen(a)}</b>
                   <small>
                     {ruleText(a)} · {dormOf(a.dorm).name}
                     {a.on && d ? ` · 다음 ${dayLabel(d, today)}` : ""}
@@ -153,7 +153,12 @@ function NewRule() {
   const { s, update, toast } = useDesk();
   const [v, setV] = useState<Omit<Alarm, "id" | "on">>({ offset: 1, meal: "breakfast", time: "21:00", dorm: s.dorm, repeat: "all" });
   const set = <K extends keyof typeof v>(k: K, x: (typeof v)[K]) => setV((o) => ({ ...o, [k]: x }));
-  const dup = s.alarms.some((a) => sameRule(a, v) && a.repeat === v.repeat);
+  const close = v.before !== undefined;
+  // 저장할 모양: 마감 알림은 분을 맞추고 평일 기준 시각을 채운다.
+  const rule: Omit<Alarm, "id" | "on"> = close
+    ? { ...v, offset: 0, before: clampBefore(v.before ?? 30), time: closeAlarmTime(v.repeat === "weekend" ? "weekend" : "weekday", v.meal, clampBefore(v.before ?? 30)) }
+    : (({ before: _, ...r }) => r)(v);
+  const dup = s.alarms.some((a) => sameRule(a, rule));
   return (
     <section className="sec form st" style={st(3)}>
       <div className="sh">
@@ -162,32 +167,71 @@ function NewRule() {
       <label className="fl">언제</label>
       <div className="row">
         <Seg label="반복" value={v.repeat} onChange={(r: Repeat) => set("repeat", r)} items={REPEATS} />
-        <input className="time" type="time" value={v.time} required onChange={(e) => e.target.value && set("time", e.target.value)} aria-label="알림 시각" />
+        <Seg
+          label="방식"
+          value={close ? "close" : "time"}
+          onChange={(m: string) => setV((o) => (m === "close" ? { ...o, before: o.before || 30 } : { ...o, before: undefined }))}
+          items={[
+            ["time", "시각 정하기"],
+            ["close", "마감 전에"],
+          ]}
+        />
+      </div>
+      <div className="row">
+        {close ? (
+          <>
+            <div className="presets">
+              {BEFORE_CHOICES.map((n) => (
+                <button key={n} className={v.before === n ? "on" : ""} aria-pressed={v.before === n} onClick={() => set("before", n)}>
+                  {n}분 전
+                </button>
+              ))}
+            </div>
+            <label className="mins">
+              <input
+                className="time"
+                type="number"
+                min={5}
+                max={BEFORE_MAX}
+                step={5}
+                value={v.before || ""}
+                onChange={(e) => set("before", Number(e.target.value) || 0)}
+                onBlur={() => set("before", clampBefore(v.before ?? 30))}
+                aria-label="입장 마감 몇 분 전"
+              />
+              분 전
+            </label>
+          </>
+        ) : (
+          <input className="time" type="time" value={v.time} required onChange={(e) => e.target.value && set("time", e.target.value)} aria-label="알림 시각" />
+        )}
       </div>
       <label className="fl">어떤 메뉴</label>
       <div className="row">
-        <Seg
-          label="날"
-          value={String(v.offset)}
-          onChange={(o: string) => set("offset", o === "1" ? 1 : 0)}
-          items={[
-            ["0", "오늘"],
-            ["1", "내일"],
-          ]}
-        />
+        {!close && (
+          <Seg
+            label="날"
+            value={String(v.offset)}
+            onChange={(o: string) => set("offset", o === "1" ? 1 : 0)}
+            items={[
+              ["0", "오늘"],
+              ["1", "내일"],
+            ]}
+          />
+        )}
         <Seg label="메뉴" value={v.meal} onChange={(m: Meal) => set("meal", m)} items={MEALS.map((m) => [m, MEAL_NAME[m]])} />
       </div>
       <label className="fl">식당</label>
       <Seg label="식당" value={v.dorm} onChange={(d: Dorm) => set("dorm", d)} items={DORMS.map((d) => [d.id, d.name])} />
       <p className="preview">
-        <b>{ruleText(v)}</b> 메뉴를 {dormOf(v.dorm).name}에서 받아 보내요
+        <b>{ruleText(rule)}</b> {close ? `· ${closeTimesText(rule)}에 메뉴와 함께 알려요` : `메뉴를 ${dormOf(v.dorm).name}에서 받아 보내요`}
       </p>
       <button
         className="cta"
         disabled={dup}
         onClick={() => {
-          update((x) => void x.alarms.push({ ...v, id: newId(), on: true }));
-          toast(`${ruleText(v)} 알림을 추가했어요`);
+          update((x) => void x.alarms.push({ ...rule, id: newId(), on: true }));
+          toast(`${ruleText(rule)} 알림을 추가했어요`);
         }}
       >
         {dup ? "이미 있는 규칙이에요" : "알림 추가"}

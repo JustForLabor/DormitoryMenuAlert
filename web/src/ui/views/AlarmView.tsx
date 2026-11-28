@@ -3,11 +3,11 @@
 // 알림 탭 (가운데 버튼): C 버전 `dorm-menu alarm add 날 아침|점심|저녁 HH:MM 학사` 규칙을 화면으로 만든 것.
 // Android 앱 안에서는 규칙이 바뀔 때마다 앱에 넘겨 AlarmManager로 예약한다(app.tsx). 웹은 이 브라우저 알림으로 보낸다.
 import { useState } from "react";
-import { DORMS, MEALS, MEAL_NAME, addDays, dormOf, isWeekend, kstMinute, kstToday, shortDate, type Dorm, type Meal, type Ymd } from "@/lib/menu";
+import { DORMS, MEALS, MEAL_NAME, addDays, dormOf, entryEnd, isWeekend, kstMinute, kstToday, shortDate, type Dorm, type Meal, type Ymd } from "@/lib/menu";
 import { useMobile } from "../app";
 import { haptic } from "../motion";
 import { bridge, useNativeState } from "../native";
-import { deliveredAlarms, type Alarm, type Repeat } from "../store";
+import { BEFORE_CHOICES, BEFORE_MAX, alarmTimeOn, closeAlarmTime, deliveredAlarms, type Alarm, type Repeat } from "../store";
 import { Ico, Icon, Mascot, st } from "../kit";
 import { AppSheet, DORM_ICON } from "../sheets";
 import { WebPushCard } from "../WebPushCard";
@@ -20,7 +20,12 @@ export const PRESETS: readonly Omit<Alarm, "id" | "dorm" | "on">[] = [
   { offset: 1, meal: "breakfast", time: "21:00", repeat: "all" },
   { offset: 0, meal: "lunch", time: "11:00", repeat: "all" },
   { offset: 0, meal: "dinner", time: "17:00", repeat: "all" },
+  { offset: 0, meal: "dinner", time: "18:10", repeat: "all", before: 30 },
 ];
+
+type RuleKey = Pick<Alarm, "offset" | "meal" | "time" | "repeat" | "before">;
+export const sameKind = (a: RuleKey, b: RuleKey) =>
+  a.meal === b.meal && a.repeat === b.repeat && (a.before ?? 0) === (b.before ?? 0) && (a.before ? true : a.offset === b.offset && a.time === b.time);
 
 export const newId = () => Math.random().toString(36).slice(2, 10);
 
@@ -31,13 +36,25 @@ const repeatsOn = (r: Repeat, d: Ymd) => r === "all" || (r === "weekend") === is
 export function nextFire(a: Alarm, today = kstToday(), now = kstMinute()): Ymd | null {
   for (let i = 0; i < 8; i++) {
     const d = addDays(today, i);
-    if (i === 0 && toMin(a.time) <= now) continue;
+    if (i === 0 && toMin(alarmTimeOn(a, d)) <= now) continue;
     if (repeatsOn(a.repeat, d)) return d;
   }
   return null;
 }
 
-export const ruleText = (a: Pick<Alarm, "offset" | "meal" | "time" | "repeat">) => `${REPEAT_NAME[a.repeat]} ${a.time} · ${DAY_NAME[a.offset]} ${MEAL_NAME[a.meal]}`;
+/** 목록 제목: 시각 또는 "마감 30분 전" */
+export const ruleWhen = (a: RuleKey) => (a.before ? `마감 ${a.before}분 전` : a.time);
+export const ruleText = (a: RuleKey) =>
+  a.before ? `${REPEAT_NAME[a.repeat]} ${MEAL_NAME[a.meal]} 입장 마감 ${a.before}분 전` : `${REPEAT_NAME[a.repeat]} ${a.time} · ${DAY_NAME[a.offset]} ${MEAL_NAME[a.meal]}`;
+
+/** 마감 알림이 울리는 시각 안내: "평일 18:10(마감 18:40) · 주말 17:50(마감 18:20)" */
+export function closeTimesText(a: Pick<Alarm, "meal" | "repeat" | "before">): string {
+  const days = a.repeat === "all" ? (["weekday", "weekend"] as const) : [a.repeat];
+  return days.map((d) => `${REPEAT_NAME[d]} ${closeAlarmTime(d, a.meal, a.before ?? 0)}(마감 ${entryEnd(d, a.meal)})`).join(" · ");
+}
+
+/** 마감 몇 분 전: 고르기 + 직접 입력. 입력 중 빈 값도 허용하고, 저장할 때 5~180분으로 맞춘다. */
+export const clampBefore = (n: number) => Math.min(BEFORE_MAX, Math.max(5, Math.round(n) || 30));
 
 export function AlarmEditSheet({ alarm }: { alarm?: Alarm }) {
   const { s, update, closeSheet, toast } = useMobile();
@@ -46,19 +63,30 @@ export function AlarmEditSheet({ alarm }: { alarm?: Alarm }) {
     haptic("select");
     setV((o) => ({ ...o, [k]: x }));
   };
+  const close = v.before !== undefined;
+  const setMode = (c: boolean) => {
+    haptic("select");
+    setV((o) => (c ? { ...o, before: o.before || 30, offset: 0 } : { ...o, before: undefined }));
+  };
   const save = () => {
+    const r: Alarm = { ...v, on: true };
+    if (r.before !== undefined) {
+      r.before = clampBefore(r.before);
+      r.offset = 0;
+      r.time = closeAlarmTime(r.repeat === "weekend" ? "weekend" : "weekday", r.meal, r.before);
+    } else delete r.before;
     update((x) => {
-      const i = x.alarms.findIndex((a) => a.id === v.id);
-      if (i >= 0) x.alarms[i] = { ...v, on: true };
-      else x.alarms.push({ ...v, on: true });
+      const i = x.alarms.findIndex((a) => a.id === r.id);
+      if (i >= 0) x.alarms[i] = r;
+      else x.alarms.push(r);
     });
     closeSheet();
-    toast(`${ruleText(v)} 알림을 저장했어요`);
+    toast(`${ruleText(r)} 알림을 저장했어요`);
   };
   return (
     <>
       <h3>{alarm ? "알림 고치기" : "알림 추가"}</h3>
-      <p className="sd">이 시각에 메뉴를 보내 드려요</p>
+      <p className="sd">{close ? "식당 입장 마감 전에 메뉴와 함께 알려 드려요" : "정한 시각에 메뉴를 보내 드려요"}</p>
       <p className="kid-h">언제</p>
       <div className="seg3">
         {(["all", "weekday", "weekend"] as const).map((r) => (
@@ -67,18 +95,58 @@ export function AlarmEditSheet({ alarm }: { alarm?: Alarm }) {
           </button>
         ))}
       </div>
-      <label className="sbox" style={{ marginTop: 10 }}>
-        <Icon k="clock" />
-        <input type="time" value={v.time} required onChange={(e) => e.target.value && setV((o) => ({ ...o, time: e.target.value }))} aria-label="알림 시각" />
-      </label>
-      <p className="kid-h">어떤 메뉴</p>
       <div className="seg3" style={{ gridTemplateColumns: "1fr 1fr" }}>
-        {([0, 1] as const).map((o) => (
-          <button key={o} className={v.offset === o ? "on" : ""} onClick={() => set("offset", o)}>
-            {DAY_NAME[o]}
-          </button>
-        ))}
+        <button className={close ? "" : "on"} onClick={() => setMode(false)}>
+          시각 정하기
+        </button>
+        <button className={close ? "on" : ""} onClick={() => setMode(true)}>
+          마감 전에
+        </button>
       </div>
+      {close ? (
+        <>
+          <div className="seg3" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+            {BEFORE_CHOICES.map((n) => (
+              <button key={n} className={v.before === n ? "on" : ""} onClick={() => set("before", n)}>
+                {n}분 전
+              </button>
+            ))}
+          </div>
+          <label className="sbox" style={{ marginTop: 10 }}>
+            <Icon k="clock" />
+            <input
+              type="number"
+              inputMode="numeric"
+              min={5}
+              max={BEFORE_MAX}
+              step={5}
+              value={v.before || ""}
+              onChange={(e) => setV((o) => ({ ...o, before: Number(e.target.value) || 0 }))}
+              onBlur={() => setV((o) => ({ ...o, before: clampBefore(o.before ?? 30) }))}
+              aria-label="입장 마감 몇 분 전"
+            />
+            <span className="sub">분 전</span>
+          </label>
+          <p className="sub" style={{ margin: "8px 2px 0" }}>
+            {closeTimesText({ ...v, before: clampBefore(v.before ?? 30) })}에 울려요
+          </p>
+        </>
+      ) : (
+        <label className="sbox" style={{ marginTop: 10 }}>
+          <Icon k="clock" />
+          <input type="time" value={v.time} required onChange={(e) => e.target.value && setV((o) => ({ ...o, time: e.target.value }))} aria-label="알림 시각" />
+        </label>
+      )}
+      <p className="kid-h">어떤 메뉴</p>
+      {!close && (
+        <div className="seg3" style={{ gridTemplateColumns: "1fr 1fr" }}>
+          {([0, 1] as const).map((o) => (
+            <button key={o} className={v.offset === o ? "on" : ""} onClick={() => set("offset", o)}>
+              {DAY_NAME[o]}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="seg3">
         {MEALS.map((m) => (
           <button key={m} className={v.meal === m ? "on" : ""} onClick={() => set("meal", m as Meal)}>
@@ -183,8 +251,9 @@ export function AlarmView() {
     .filter((a) => a.on)
     .map((a) => ({ a, d: nextFire(a) }))
     .filter((x): x is { a: Alarm; d: Ymd } => !!x.d)
-    .sort((x, y) => (x.d + x.a.time).localeCompare(y.d + y.a.time))[0];
-  const missing = PRESETS.filter((p) => !s.alarms.some((a) => a.offset === p.offset && a.meal === p.meal && a.time === p.time && a.repeat === p.repeat));
+    .map((x) => ({ ...x, t: alarmTimeOn(x.a, x.d) }))
+    .sort((x, y) => (x.d + x.t).localeCompare(y.d + y.t))[0];
+  const missing = PRESETS.filter((p) => !s.alarms.some((a) => sameKind(a, p)));
 
   return (
     <>
@@ -204,10 +273,12 @@ export function AlarmView() {
             </span>
             <div>
               <h2>
-                {upcoming.d === today ? "오늘" : shortDate(upcoming.d)} {upcoming.a.time}
+                {upcoming.d === today ? "오늘" : shortDate(upcoming.d)} {upcoming.t}
               </h2>
               <p>
-                다음 알림 · {dormOf(upcoming.a.dorm).label} {upcoming.a.offset ? shortDate(addDays(upcoming.d, 1)) : ""} {MEAL_NAME[upcoming.a.meal]} 메뉴
+                {upcoming.a.before
+                  ? `다음 알림 · ${dormOf(upcoming.a.dorm).label} ${MEAL_NAME[upcoming.a.meal]} 입장 마감 ${upcoming.a.before}분 전`
+                  : `다음 알림 · ${dormOf(upcoming.a.dorm).label} ${upcoming.a.offset ? shortDate(addDays(upcoming.d, 1)) : ""} ${MEAL_NAME[upcoming.a.meal]} 메뉴`}
               </p>
             </div>
           </div>
@@ -223,7 +294,7 @@ export function AlarmView() {
               </span>
               <button className="press" style={{ flex: 1, textAlign: "left" }} onClick={() => sheet(<AlarmEditSheet key={a.id + Date.now()} alarm={a} />)}>
                 <p style={{ opacity: a.on ? 1 : 0.45 }}>
-                  {a.time} · {DAY_NAME[a.offset]} {MEAL_NAME[a.meal]}
+                  {a.before ? `${MEAL_NAME[a.meal]} 마감 ${a.before}분 전` : `${a.time} · ${DAY_NAME[a.offset]} ${MEAL_NAME[a.meal]}`}
                   <small>
                     {REPEAT_NAME[a.repeat]} · {dormOf(a.dorm).label}
                   </small>
@@ -247,8 +318,8 @@ export function AlarmView() {
                 <Icon k={p.meal === "dinner" ? "bowl" : "tray"} />
               </span>
               <p>
-                {p.time} · {DAY_NAME[p.offset]} {MEAL_NAME[p.meal]}
-                <small>{p.offset ? "자기 전에 내일 아침 메뉴 미리 보기" : p.meal === "lunch" ? "점심 먹으러 가기 전에" : "저녁 먹으러 가기 전에"}</small>
+                {p.before ? `${MEAL_NAME[p.meal]} 마감 ${p.before}분 전` : `${p.time} · ${DAY_NAME[p.offset]} ${MEAL_NAME[p.meal]}`}
+                <small>{p.before ? closeTimesText(p) : p.offset ? "자기 전에 내일 아침 메뉴 미리 보기" : p.meal === "lunch" ? "점심 먹으러 가기 전에" : "저녁 먹으러 가기 전에"}</small>
               </p>
               <span className="pbtn">추가</span>
             </button>

@@ -1,12 +1,12 @@
 {
-  "versionCode": 5,
-  "versionName": "1.2.1",
+  "versionCode": 6,
+  "versionName": "1.2.2",
   "url": "https://dorm.ybkim.pe.kr/download/android?src=update",
-  "sha256": "a27f4c294ca966ae4f0a22f7a1ffaf4ce69233627ba49d55cf83fedb344e7651",
-  "size": 134904,
+  "sha256": "12a5aed9749e849345faa03a3c1d7accab26f55d4994447c8beb4da90a9ef7b6",
+  "size": 134944,
   "notes": [
-    "인스타그램 DM으로 보낼 때 받을 사람을 바로 고를 수 있어요.",
-    "즐겨찾기한 메뉴가 나오는 날 알려 드려요."
+    "식당 입장 마감 몇 분 전에 알림을 받을 수 있어요.",
+    "그날 그 밥이 안 나오면 마감 알림을 보내지 않아요."
   ],
   "published": "2026-11-28"
 }

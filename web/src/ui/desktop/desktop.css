@@ -352,6 +352,13 @@
 .wld .form .sh + .fl { margin-top: 0; }
 .wld .form .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .wld .time { height: 46px; padding: 0 14px; border: 0; border-radius: 14px; background: var(--soft); font: inherit; font-size: 17px; font-weight: 800; color: var(--ink); }
+.wld .form .row + .row { margin-top: 10px; }
+.wld .mins { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 750; color: var(--ink2); }
+.wld .mins .time { width: 92px; }
+.wld .favc { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.wld .favc button { padding: 11px 15px; border-radius: 14px; background: #fff; box-shadow: var(--sh); font-size: 13.5px; font-weight: 750; }
+.wld .favc button.on { background: var(--grad); color: #fff; }
+.wld .favc input { height: 44px; padding: 0 14px; border: 0; border-radius: 14px; background: var(--soft); font: inherit; font-size: 16px; font-weight: 800; color: var(--ink); }
 .wld .preview { margin: 20px 0 14px; padding: 14px 16px; border-radius: 16px; background: var(--peach); font-size: 14px; color: var(--ink2); }
 .wld .preview b { color: var(--ink); }
 .wld .form .cta { width: 100%; }

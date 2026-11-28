@@ -132,6 +132,10 @@
 .wlm .seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .wlm .seg3 button{height:46px;border-radius:14px;border:1.5px solid var(--line);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
 .wlm .seg3 button.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.wlm .favc{display:grid;grid-template-columns:1fr 1fr 1.8fr;gap:8px;margin:0 0 12px}
+.wlm .favc button{height:46px;border-radius:14px;border:1.5px solid var(--line);font-size:14px;font-weight:700}
+.wlm .favc button.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.wlm .favc input{height:46px;border:0;border-radius:14px;background:#F4F5F8;padding:0 8px;font:inherit;font-size:15px;font-weight:700;min-width:0}
 .wlm .lc{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin:14px 16px 0;padding:22px 16px 6px}
 .wlm .lc h3{font-size:18px;font-weight:800;padding:0 4px 6px;letter-spacing:-.03em}
 .wlm .lr{display:flex;align-items:center;gap:14px;width:100%;padding:12px 4px;text-align:left}
