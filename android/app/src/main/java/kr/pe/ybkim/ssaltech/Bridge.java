@@ -3,8 +3,10 @@ package kr.pe.ybkim.ssaltech;
 import android.Manifest;
 import android.app.NotificationManager;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -16,6 +18,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Locale;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -95,7 +99,7 @@ final class Bridge {
         }
     }
 
-    private static Intent textIntent(String title, String text, String url) {
+    static Intent textIntent(String title, String text, String url) {
         Intent send = new Intent(Intent.ACTION_SEND);
         send.setType("text/plain");
         send.putExtra(Intent.EXTRA_TITLE, title);
@@ -112,11 +116,28 @@ final class Bridge {
         activity.runOnUiThread(() -> activity.startActivity(Intent.createChooser(send, title == null ? "" : title)));
     }
 
-    /** 글과 링크를 한 앱(예: 인스타그램 DM)으로 바로 보낸다. 그 앱이 없으면 false. */
+    /**
+     * 글과 링크를 pkg 앱으로 바로 보내는 Intent. 그 앱이 없으면 null.
+     * 그 앱에 DM(이름에 direct) 받는 화면이 있으면 그 화면을 고른다. 인스타그램은 거기서 받을 사람·대화방을 고르게 한다.
+     */
+    static Intent sendTo(Context ctx, String pkg, String title, String text, String url) {
+        Intent send = textIntent(title, text, url).setPackage(pkg);
+        List<ResolveInfo> targets = ctx.getPackageManager().queryIntentActivities(send, 0);
+        if (targets.isEmpty()) return null;
+        for (ResolveInfo r : targets) {
+            if (r.activityInfo.name.toLowerCase(Locale.ROOT).contains("direct")) {
+                send.setClassName(r.activityInfo.packageName, r.activityInfo.name);
+                break;
+            }
+        }
+        return send;
+    }
+
+    /** 글과 링크를 한 앱으로 바로 보낸다(sendTo). 그 앱이 없으면 false. */
     @JavascriptInterface
     public boolean shareTo(String pkg, String title, String text, String url) {
-        Intent send = textIntent(title, text, url).setPackage(pkg);
-        if (send.resolveActivity(activity.getPackageManager()) == null) return false;
+        Intent send = sendTo(activity, pkg, title, text, url);
+        if (send == null) return false;
         activity.runOnUiThread(() -> activity.startActivity(send));
         return true;
     }
@@ -179,6 +200,13 @@ final class Bridge {
     @JavascriptInterface
     public boolean favAlarms() {
         return true;
+    }
+
+    /** 웹 테마 "light" | "dark". 시스템 바 색을 맞춘다(web/src/ui/theme.ts). */
+    @JavascriptInterface
+    public void setTheme(String mode) {
+        final boolean dark = "dark".equals(mode);
+        activity.runOnUiThread(() -> activity.applyTheme(dark));
     }
 
     /** 규칙 하나를 지금 한 번 울린다(알림 탭의 "시험 알림"). */

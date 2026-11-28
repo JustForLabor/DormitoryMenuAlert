@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 기기가 다크 모드일 때. 밝지 않은 테마라 WebView 의 prefers-color-scheme 도 dark 가 된다(targetSdk 33+).
+         웹에서 테마를 직접 고르면 MainActivity.applyTheme 가 시스템 바 색을 다시 맞춘다. -->
+    <color name="bg">#0F1115</color>
+    <color name="brand">#FF6A45</color>
+
+    <style name="Theme.SsalTech" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:colorAccent">@color/brand</item>
+    </style>
+</resources>

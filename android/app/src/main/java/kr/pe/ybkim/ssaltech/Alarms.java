@@ -192,6 +192,9 @@ final class Alarms {
                 for (int i = 0; i < Math.min(favs.length(), 50); i++) q.append("&fav=").append(enc(favs.optString(i, "")));
             } else {
                 q.append("&meal=").append(enc(meal));
+                // 마감 알림: 서버가 "점심 입장 마감 30분 전" 제목을 만들고, 그날 그 밥이 없으면 skip 을 준다.
+                int before = a.optInt("before", 0);
+                if (before > 0) q.append("&before=").append(before);
             }
             conn = (HttpURLConnection) new URL(BuildConfig.BASE_URL + "/api/notify?" + q).openConnection();
             conn.setConnectTimeout(TIMEOUT_MS);
@@ -201,10 +204,8 @@ final class Alarms {
                 JSONObject j = new JSONObject(readAll(conn.getInputStream()));
                 title = j.optString("title", title);
                 body = j.optString("body", body);
-                if (fav) {
-                    show = !j.optBoolean("skip", false);
-                    meal = j.optString("meal", meal);
-                }
+                show = !j.optBoolean("skip", false);
+                if (fav) meal = j.optString("meal", meal);
             } else {
                 Log.w(TAG, "notify HTTP " + conn.getResponseCode());
             }
@@ -214,7 +215,7 @@ final class Alarms {
             if (conn != null) conn.disconnect();
         }
         if (!show) {
-            Log.i(TAG, "fav alarm: no favorite on " + date);
+            Log.i(TAG, (fav ? "fav alarm: no favorite on " : "alarm skipped: no meal on ") + date);
             return;
         }
         String path = "/?dorm=" + enc(dorm) + "&date=" + date + "&meal=" + enc(meal) + "&utm_source=push&utm_medium=notification";

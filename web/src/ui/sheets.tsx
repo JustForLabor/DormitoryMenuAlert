@@ -1,6 +1,6 @@
 "use client";
 
-// 바텀 시트 모음: 검색, 소식 전체, 알림함, 운영시간, 식당 고르기, 앱 받기, 터미널 버전, 데이터 안내, 내 기록, 초기화.
+// 바텀 시트 모음: 검색, 소식 전체, 알림함, 운영시간, 식당 고르기, 앱 받기, 데이터 안내, 내 기록, 초기화.
 import { useEffect, useRef, useState } from "react";
 import {
   DORMS,
@@ -347,37 +347,6 @@ export function AppSheet() {
           SsalTech.apk 내려받기
         </a>
       )}
-    </>
-  );
-}
-
-// ---------- 터미널 버전 ----------
-
-export function CliSheet() {
-  const rows = [
-    ["dorm-menu", "오늘 식단"],
-    ["dorm-menu next", "다음 밥"],
-    ["dorm-menu week", "이번 주 식단"],
-    ["dorm-menu alarm add 내일 아침 21:00 kb", "매일 21:00에 내일 아침 메뉴를 터미널로 알림"],
-  ] as const;
-  return (
-    <>
-      <h3>터미널에서도 보기</h3>
-      <p className="sd">SsalTech의 원조, C로 만든 dorm-menu 명령 (Linux·macOS·Solaris)</p>
-      {rows.map(([c, d]) => (
-        <div className="lr" key={c}>
-          <span className="sq">
-            <Icon k="clip" />
-          </span>
-          <p>
-            <code style={{ fontSize: 14 }}>{c}</code>
-            <small>{d}</small>
-          </p>
-        </div>
-      ))}
-      <a className="cta press" href={REPO_URL} target="_blank" rel="noreferrer" style={{ display: "grid", placeItems: "center", marginTop: 16, textDecoration: "none" }}>
-        GitHub에서 보기
-      </a>
     </>
   );
 }

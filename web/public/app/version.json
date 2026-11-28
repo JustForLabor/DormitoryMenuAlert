@@ -1,12 +1,12 @@
 {
-  "versionCode": 4,
-  "versionName": "1.2.0",
+  "versionCode": 9,
+  "versionName": "1.2.5",
   "url": "https://dorm.ybkim.pe.kr/download/android?src=update",
-  "sha256": "a9bb0507e3f2644af01f51ec33c1b7176c2f8ee48b57c24167b6300e757ef85e",
-  "size": 134660,
+  "sha256": "0aa18a3e4732d313c532f04acec2c0215a04d8c5ce08952892fb46223bac4d82",
+  "size": 136816,
   "notes": [
-    "즐겨찾기한 메뉴가 나오는 날 알려 드려요.",
-    "인스타그램 DM·스토리로 바로 공유해요."
+    "Chrome에서 사이트를 열어도 이 앱이 설치된 걸 알아보고 앱 받기 안내를 숨겨요.",
+    "휴대폰 브라우저에서 인스타그램 DM 공유를 누르면 이 앱을 거쳐 받을 사람 고르기로 바로 가요."
   ],
-  "published": "2026-11-28"
+  "published": "2026-11-29"
 }

@@ -352,6 +352,13 @@
 .wld .form .sh + .fl { margin-top: 0; }
 .wld .form .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .wld .time { height: 46px; padding: 0 14px; border: 0; border-radius: 14px; background: var(--soft); font: inherit; font-size: 17px; font-weight: 800; color: var(--ink); }
+.wld .form .row + .row { margin-top: 10px; }
+.wld .mins { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 750; color: var(--ink2); }
+.wld .mins .time { width: 92px; }
+.wld .favc { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.wld .favc button { padding: 11px 15px; border-radius: 14px; background: #fff; box-shadow: var(--sh); font-size: 13.5px; font-weight: 750; }
+.wld .favc button.on { background: var(--grad); color: #fff; }
+.wld .favc input { height: 44px; padding: 0 14px; border: 0; border-radius: 14px; background: var(--soft); font: inherit; font-size: 16px; font-weight: 800; color: var(--ink); }
 .wld .preview { margin: 20px 0 14px; padding: 14px 16px; border-radius: 16px; background: var(--peach); font-size: 14px; color: var(--ink2); }
 .wld .preview b { color: var(--ink); }
 .wld .form .cta { width: 100%; }
@@ -482,7 +489,8 @@
   .wld .srch { width: 280px; }
 }
 @media (max-width: 1180px) {
-  .wld .split { grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; }
+  /* iPad 가로·iPad Pro 세로: 주간표를 전체 폭으로 쓰고 식사 상세는 아래로 */
+  .wld .split { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .wld .board { padding: 18px 14px 14px; }
   .wld .seg.dorms small { display: none; }
   .wld .seg.dorms button { height: 52px; }
@@ -530,3 +538,79 @@
 .wld .sico-x{background:#000}
 .wld .sico-instagram,.wld .sico-dm{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
 .wld .sico-copy,.wld .sico-more,.wld .sico-back{background:#EEF0F3}
+
+/* 다크 모드: html[data-theme="dark"] 일 때만. 우선순위가 같은 선택자끼리만 :is() 로 묶는다(밝은 화면 규칙보다 한 단만 세게). */
+html[data-theme="dark"] .wld {
+  --ink: #eceef2; --ink2: #b4b9c3; --ink3: #8a909b; --line: #2e323a; --line2: #262a31; --soft: #20242b;
+  --red: #ff6b70; --berry: #7c9bff; --peach: #2b1f1a; --card: #181b21;
+  --sh: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .28);
+  background:
+    radial-gradient(1100px 520px at 10% -8%, #2a1a12 0, transparent 62%),
+    radial-gradient(900px 600px at 105% 108%, #1e1a33 0, transparent 60%),
+    #0f1115;
+  background-attachment: fixed;
+}
+html[data-theme="dark"] .wld .side { background: rgba(24, 27, 33, .7); box-shadow: 1px 0 0 rgba(255, 255, 255, .05); }
+/* 흰 카드 → 카드색 */
+html[data-theme="dark"] .wld :is(.ghost, .drop, .meal, .cmp, .board, .panel, .calm, .recent, .hours, .links, .pushcard, .share-menu) { background: var(--card); }
+html[data-theme="dark"] .wld :is(.nav .thumb, .srch .box, .hello .eyebrow, .cell.on, .mday.on, .rules li, .presets button, .favc button, .alg button, .watch button, .dormpick button, .stats > div) { background: var(--card); }
+html[data-theme="dark"] .wld :is(.sec.form, .sec.install) { background: var(--card); }
+html[data-theme="dark"] .wld .pager button:hover:not(:disabled) { background: #2a2e36; }
+html[data-theme="dark"] .wld .seg { background: rgba(255, 255, 255, .06); }
+html[data-theme="dark"] .wld .seg .thumb { background: #2e333c; box-shadow: 0 2px 8px rgba(0, 0, 0, .4); }
+html[data-theme="dark"] .wld .steps i.ap { background: #2a2e36; }
+html[data-theme="dark"] .wld .srch.big .box { background: linear-gradient(#181b21, #181b21) padding-box, linear-gradient(90deg, #ffa05e, #ff6f6e, #ff5c80, #7b61ff, #ffa05e) border-box; background-size: 100% 100%, 300% 100%; }
+html[data-theme="dark"] .wld .srch .roll b { color: #a595ff; }
+/* 위 칸 규칙이 덮은 선택 상태를 되살린다 */
+html[data-theme="dark"] .wld :is(.presets button.on, .favc button.on) { background: var(--grad); }
+html[data-theme="dark"] .wld .presets button.on:hover { background: var(--grad); }
+/* 머무름·눌림 */
+html[data-theme="dark"] .wld .nav button:hover:not(.on) { background: rgba(255, 255, 255, .05); }
+html[data-theme="dark"] .wld .icon-btn:hover { background: #2a2e36; }
+html[data-theme="dark"] .wld :is(.cell:hover, .mday:hover) { background: #262a31; }
+html[data-theme="dark"] .wld .cmp .col:hover { background: #1e2128; }
+html[data-theme="dark"] .wld .cell.today { background: #2b1f1a; }
+html[data-theme="dark"] .wld .cell.today:hover { background: #33241d; }
+html[data-theme="dark"] .wld :is(.cell.na, .mday.na) { background: repeating-linear-gradient(135deg, #1a1d22 0 8px, #20242b 8px 16px); }
+/* 자리 표시(반짝이는 막대) */
+html[data-theme="dark"] .wld :is(.skl, .skel i) { background: linear-gradient(90deg, #20242b 0, #2c3038 50%, #20242b 100%); background-size: 200% 100%; }
+html[data-theme="dark"] .wld .hello h1.sk span { background: linear-gradient(90deg, #20242b 0, #2c3038 50%, #20242b 100%); background-size: 200% 100%; }
+/* 주황·분홍 칸 */
+html[data-theme="dark"] .wld .meal.now { background: linear-gradient(165deg, var(--card) 45%, #2b1f1a); }
+html[data-theme="dark"] .wld .meal.next .chip { background: #1d2440; }
+html[data-theme="dark"] .wld .cmp .col.mine { background: linear-gradient(180deg, #2b1f1a, var(--card) 70%); }
+html[data-theme="dark"] .wld .dormpick button.on { background: linear-gradient(170deg, var(--card), #2b1f1a); }
+html[data-theme="dark"] .wld .hl { background-image: linear-gradient(transparent 60%, rgba(255, 140, 90, .38) 60%, rgba(255, 120, 80, .38) 94%, transparent 94%); }
+html[data-theme="dark"] .wld .promo { background: linear-gradient(160deg, #2b1f1a, #2e1a21); }
+html[data-theme="dark"] .wld :is(.cmp .dn em, .seg.dorms b em) { background: #2b1f1a; }
+html[data-theme="dark"] .wld .mini { background: #2b1f1a; }
+html[data-theme="dark"] .wld .mini:hover { background: #3a2820; }
+html[data-theme="dark"] .wld :is(.warn, .alert, .wh span) { background: #3a1c1e; }
+html[data-theme="dark"] .wld :is(.badge.soft, .del:hover) { background: #3a1c1e; }
+html[data-theme="dark"] .wld .alert small { color: #e89a9d; }
+html[data-theme="dark"] .wld .alg button.on { background: #3a1c1e; box-shadow: 0 0 0 2px #6b2a2e; }
+html[data-theme="dark"] .wld .favs span { background: #3a1a26; color: #ff8fab; }
+html[data-theme="dark"] .wld .banner.pink { background: linear-gradient(135deg, #3a1f27 0%, #43222c 100%); }
+html[data-theme="dark"] .wld .banner p { color: #e0b8c2; }
+html[data-theme="dark"] .wld .banner.lilac { background: linear-gradient(135deg, #211f3a, #1b2440); }
+html[data-theme="dark"] .wld .banner.lilac p { color: #b4b9d6; }
+html[data-theme="dark"] .wld .ahero { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06); }
+html[data-theme="dark"] .wld .sw { background: #3a3f48; }
+html[data-theme="dark"] .wld .sw.on { background: var(--grad); }
+html[data-theme="dark"] .wld .pc-chip { background: #2a2e36; color: #b4b9c3; }
+html[data-theme="dark"] .wld .pc-chip.on { background: #142a1f; color: #5ed69a; }
+html[data-theme="dark"] .wld .pc-chip.bad { background: #3a1c1e; color: #ff8a80; }
+/* 짙은 바탕 + 흰 글자였던 것: 밝은 바탕 + 짙은 글자 */
+html[data-theme="dark"] .wld .wk .dh em { background: rgba(236, 238, 242, .9); color: #111318; }
+html[data-theme="dark"] .wld :is(.upd, .toast) { background: rgba(236, 238, 242, .95); color: #111318; }
+/* 공유 */
+html[data-theme="dark"] .wld .sharebtn { background: var(--soft); color: var(--ink2); }
+html[data-theme="dark"] .wld .sharebtn:hover { background: #2a2e36; }
+html[data-theme="dark"] .wld .sharebtn[aria-expanded="true"] { background: var(--ink); color: #111318; }
+html[data-theme="dark"] .wld .share-list.desk .si { color: var(--ink); }
+html[data-theme="dark"] .wld .share-list.desk .si:hover { background: var(--soft); }
+html[data-theme="dark"] .wld .share-menu { box-shadow: 0 18px 44px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .06); }
+html[data-theme="dark"] .wld :is(.cell.on, .mday.on) { background: var(--card); }
+html[data-theme="dark"] .wld [fill="#17191E" i] { fill: var(--ink); }
+html[data-theme="dark"] .wld [stroke="#17191E" i] { stroke: var(--ink); }
+html[data-theme="dark"] .wld :is(.sico-copy, .sico-more, .sico-back) { background: #2a2e36; }

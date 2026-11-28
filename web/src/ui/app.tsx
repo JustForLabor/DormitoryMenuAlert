@@ -26,11 +26,12 @@ import { isDorm, isMeal, isYmd, kstToday, type Dorm, type Meal, type Ymd } from 
 import { FAB_BELL, ICON_DEFS, TAB_ICON } from "./icons";
 import { useInstall, type InstallState } from "./install";
 import { haptic, motion, prefersReducedMotion, SCREEN_IN, SCREEN_OUT, type MotionType } from "./motion";
-import { pushAlarms } from "./native";
+import { pushAlarms, useUpdateNudge } from "./native";
 import { hideSsrHome } from "./ssr";
 import { syncPushAlarms } from "./webpush";
 import { deliveredAlarms, loadState, saveState, type Alarm, type AppState } from "./store";
 import { Svg } from "./kit";
+import { useTheme } from "./theme";
 import { HomeView } from "./views/HomeView";
 import { MenuView } from "./views/MenuView";
 import { AlarmView } from "./views/AlarmView";
@@ -121,7 +122,8 @@ function boot(): Boot {
   const sel = isYmd(date) ? date : kstToday();
   const dormSel = isDorm(dorm) ? dorm : null;
   const m = isMeal(meal) ? meal : null;
-  if (!s) return { s, screen: "onb", sel, dormSel, meal: null };
+  // 처음 온 사람도 공유·알림 링크(?date=&meal=)면 그 메뉴부터 보여 준다. 기록은 남기지 않아 다음에 그냥 오면 첫 화면이 뜬다.
+  if (!s && !(isYmd(date) && m)) return { s, screen: "onb", sel, dormSel, meal: null };
   // 알림·공유 링크(?date=&meal=)는 식단표에서 그 메뉴를 연다.
   const screen: Screen = tab && isTab(tab as Screen) ? (tab as Tab) : isYmd(date) ? "menu" : "home";
   return { s, screen, sel, dormSel, meal: m };
@@ -140,6 +142,7 @@ function urlFor(screen: Screen, step: number): string {
 export function MobileApp() {
   const [init] = useState(boot);
   const [S, setS] = useState<AppState | null>(init.s);
+  useTheme(S?.theme);
   const [cur, setCur] = useState<Screen>(init.screen);
   const [ob, setOb] = useState<Onboarding>(EMPTY_OB);
   const [sel, setSel] = useState<Ymd>(init.sel);
@@ -528,6 +531,7 @@ export function MobileApp() {
   }, []);
 
   const pwa = useInstall(onInstalled);
+  useUpdateNudge();
 
   const ctx = useMemo<MobileCtx>(
     () => ({

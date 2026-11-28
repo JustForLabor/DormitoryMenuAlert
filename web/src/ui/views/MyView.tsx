@@ -5,15 +5,16 @@ import { dormOf, nextMeal, MEAL_NAME } from "@/lib/menu";
 import { useDay } from "../store";
 import { ShareSheet, toShareMeal } from "../share";
 import { useMobile } from "../app";
-import { CountUp } from "../motion";
+import { CountUp, haptic } from "../motion";
+import { THEME_CHOICES } from "../theme";
 import { APK_URL, bridge, useAppUpdate, type AppUpdate } from "../native";
 import { AL, favorites, ratingCount } from "../store";
 import { Ico, Icon, Mascot, st } from "../kit";
-import { AppSheet, CliSheet, DORM_ICON, DataSheet, DormSheet, HoursSheet, InboxSheet, REPO_URL, ReportSheet, ResetSheet } from "../sheets";
+import { AppSheet, DORM_ICON, DataSheet, DormSheet, HoursSheet, InboxSheet, REPO_URL, ReportSheet, ResetSheet } from "../sheets";
 import { AllergySheet } from "./AllergyView";
 
 export function MyView() {
-  const { s, sheet, closeSheet, go, pwa, toast } = useMobile();
+  const { s, sheet, closeSheet, go, pwa, toast, update } = useMobile();
   const dorm = dormOf(s.dorm);
   const nm = nextMeal();
   const { day: nday } = useDay(s.dorm, nm.date);
@@ -88,6 +89,28 @@ export function MyView() {
         <div style={{ height: 10 }}></div>
       </div>
       <div className="lc st" style={st(2)}>
+        <h3>화면</h3>
+        <div className="seg3" style={{ margin: "4px 0 14px" }} role="radiogroup" aria-label="화면 테마">
+          {THEME_CHOICES.map(([t, name]) => (
+            <button
+              key={name}
+              role="radio"
+              aria-checked={s.theme === t}
+              className={s.theme === t ? "on" : ""}
+              onClick={() => {
+                haptic("select");
+                update((x) => {
+                  if (t) x.theme = t;
+                  else delete x.theme;
+                });
+              }}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="lc st" style={st(2)}>
         <h3>내 정보</h3>
         <button className="lr press" onClick={() => sheet(<DormSheet />)}>
           <span className="sq">
@@ -131,7 +154,7 @@ export function MyView() {
           <p>식단 공유하기<small>{nday?.registered ? `${MEAL_NAME[nm.meal]} · ${shareMeal.dish}` : "내 식당의 다음 밥"}</small></p>
           <Icon k="chev" />
         </button>
-        {!app && !pwa.installed && (
+        {!app && !pwa.hasApp && (
           <button className="lr press" onClick={installApp}>
             <span className="sq">
               {/* eslint-disable-next-line @next/next/no-img-element -- static app icon */}
@@ -181,15 +204,6 @@ export function MyView() {
           </p>
           <Icon k="chev" />
         </button>
-        <button className="lr press" onClick={() => sheet(<CliSheet />)}>
-          <span className="sq">
-            <Icon k="clip" />
-          </span>
-          <p>
-            터미널 버전 dorm-menu<small>서버 터미널에서 식단·알림</small>
-          </p>
-          <Icon k="chev" />
-        </button>
       </div>
       <p className="foot">
         SsalTech {app ? `Android ${app.version()}` : "웹"} · 학생이 만든 비공식 앱
@@ -197,7 +211,7 @@ export function MyView() {
         <a href={REPO_URL} target="_blank" rel="noreferrer">
           소스 코드
         </a>
-        {!app && (
+        {!app && !pwa.hasApp && (
           <>
             {" · "}
             <a href={APK_URL} download>

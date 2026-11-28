@@ -9,6 +9,7 @@ import { I, STAR_OFF, STAR_ON, type IconName } from "./icons";
 import { CountUp, haptic, motion, usePageVisible, useReducedMotion } from "./motion";
 import { AL, favAddedText, favorites, hits, setFav, type Dish } from "./store";
 import { BannersSheet, InboxSheet, SearchSheet } from "./sheets";
+import { useDark } from "./theme";
 
 const ATTR = /([\w:-]+)="([^"]*)"/g;
 
@@ -181,7 +182,8 @@ export function WkChips({ days, dot, na }: { days: readonly Ymd[]; dot: (d: Ymd)
 // ---------- 홈 ----------
 
 export function Hdr() {
-  const { go, sheet } = useMobile();
+  const { s, update, sheet } = useMobile();
+  const dark = useDark(s.theme);
   return (
     <div className="hbar">
       <div className="logo">
@@ -194,8 +196,17 @@ export function Hdr() {
         <button className="ib press" onClick={() => sheet(<InboxSheet key={Date.now()} />)} aria-label="알림함">
           <Icon k="bellL" />
         </button>
-        <button className="ib press" onClick={() => go("my")} aria-label="설정">
-          <Icon k="gearL" />
+        <button
+          className="ib press"
+          onClick={() => {
+            haptic("select");
+            update((x) => {
+              x.theme = dark ? "light" : "dark";
+            });
+          }}
+          aria-label={dark ? "라이트 모드로 바꾸기" : "다크 모드로 바꾸기"}
+        >
+          <Icon k={dark ? "sunL" : "moonL"} />
         </button>
       </div>
     </div>

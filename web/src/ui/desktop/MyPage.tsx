@@ -10,7 +10,8 @@ import { CountUp } from "../motion";
 import { APK_URL } from "../native";
 import { DORM_ICON, REPO_URL } from "../sheets";
 import { favorites, ratingCount } from "../store";
-import { st, useDesk } from "./shared";
+import { THEME_CHOICES } from "../theme";
+import { Seg, st, useDesk } from "./shared";
 
 export function MyPage() {
   const { s, update, setView, toast, reset, pwa } = useDesk();
@@ -36,18 +37,38 @@ export function MyPage() {
       </header>
       <section className="sec st" style={st(1)}>
         <div className="sh">
-          <h2>공유 · 설치</h2>
-          <span>식단을 보내고, 홈 화면에 둘 수 있어요</span>
+          <h2>{pwa.hasApp ? "공유" : "공유 · 설치"}</h2>
+          <span>{pwa.hasApp ? "다음 메뉴를 친구에게 보내요" : "식단을 보내고, 홈 화면에 둘 수 있어요"}</span>
         </div>
         <div className="acts">
           <ShareButton meal={toShareMeal(s.dorm, nm.date, nm.meal, day?.meals[nm.meal] ?? "")} toast={toast} label="다음 메뉴 공유" />
-          {!pwa.installed && (
-            <button type="button" className="cta sm" onClick={() => void installApp()}>
-              {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
-            </button>
+          {!pwa.hasApp && (
+            <>
+              <button type="button" className="cta sm" onClick={() => void installApp()}>
+                {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
+              </button>
+              <a className="cta sm" href={APK_URL} download>Android 앱 받기</a>
+            </>
           )}
-          <a className="cta sm" href={APK_URL} download>Android 앱 받기</a>
         </div>
+      </section>
+
+      <section className="sec st" style={st(1)}>
+        <div className="sh">
+          <h2>화면</h2>
+          <span>기기 설정을 따르거나 라이트·다크를 고를 수 있어요</span>
+        </div>
+        <Seg
+          label="화면 테마"
+          value={s.theme ?? "system"}
+          onChange={(v: string) =>
+            update((x) => {
+              if (v === "light" || v === "dark") x.theme = v;
+              else delete x.theme;
+            })
+          }
+          items={THEME_CHOICES.map(([t, name]) => [t ?? "system", name])}
+        />
       </section>
 
       <section className="sec st" style={st(1)}>
@@ -173,11 +194,13 @@ export function MyPage() {
               <h2>앱·정보</h2>
             </div>
             <ul className="links">
-              <li>
-                <a href={APK_URL} download>
-                  Android 앱 받기 (APK)<span>→</span>
-                </a>
-              </li>
+              {!pwa.hasApp && (
+                <li>
+                  <a href={APK_URL} download>
+                    Android 앱 받기 (APK)<span>→</span>
+                  </a>
+                </li>
+              )}
               <li>
                 <a href="/?ui=mobile">
                   휴대폰 화면으로 보기<span>→</span>

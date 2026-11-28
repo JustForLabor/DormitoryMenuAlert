@@ -132,7 +132,11 @@ async function shareKakao(meal: ShareMeal, toast: (m: string) => void) {
       content: {
         title,
         description: meal.text || "서울과기대 생활관 식단",
-        imageUrl: `https://dorm.ybkim.pe.kr/s/${meal.dorm}/${meal.date}/${meal.meal}/opengraph-image`,
+        // ?v= 는 opengraph-image.tsx 의 판 번호. 카카오톡은 같은 주소의 이미지를 오래 캐시한다.
+        imageUrl: `https://dorm.ybkim.pe.kr/s/${meal.dorm}/${meal.date}/${meal.meal}/opengraph-image?v=2`,
+        // 크기를 안 주면 카카오톡이 정사각형으로 잘라 가운데만 보인다.
+        imageWidth: 1200,
+        imageHeight: 630,
         link: { mobileWebUrl: url, webUrl: url },
       },
       buttons: [{ title: "식단 보기", link: { mobileWebUrl: url, webUrl: url } }],
@@ -149,6 +153,30 @@ const INSTAGRAM = "com.instagram.android";
 function mobileOS(): boolean {
   const ua = navigator.userAgent;
   return /Android|iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
+/**
+ * 앱 딥 링크를 연다. 앱이 떠서 이 페이지가 가려지거나 포커스를 잃으면 true, 1.5초 안에 안 뜨면(앱이 없으면) false.
+ * 인스타그램 DM 화면처럼 반투명한 화면은 페이지를 가리지 않아(visibilitychange 없음) blur 로도 본다.
+ * 사용자 활성화(Chrome 5초)가 남아 있어 false 뒤에도 다음 딥 링크나 navigator.share 를 띄울 수 있다.
+ */
+function openApp(href: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const finish = (ok: boolean) => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("pagehide", onLeave);
+      window.removeEventListener("blur", onLeave);
+      clearTimeout(timer);
+      resolve(ok);
+    };
+    const onVis = () => document.visibilityState === "hidden" && finish(true);
+    const onLeave = () => finish(true);
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onLeave);
+    window.addEventListener("blur", onLeave);
+    const timer = setTimeout(() => finish(false), 1500);
+    location.href = href;
+  });
 }
 
 /** 인스타그램 DM: 링크를 보내면 받는 쪽에 미리보기 카드(opengraph-image)가 뜬다. */
@@ -171,19 +199,42 @@ async function shareInstagramDm(meal: ShareMeal, toast: (m: string) => void) {
     track("share", { net: "instagram_dm", target: key });
     return;
   }
-  // 휴대폰 브라우저: 웹에서는 인스타그램 DM 을 바로 열 수 없어 공유 시트로 넘긴다. 사진 없이 링크만 보내야 DM 에 링크가 남는다.
-  if (mobileOS() && navigator.share) {
-    try {
-      await navigator.share({ title, text: title, url });
-      track("share", { net: "instagram_dm", target: key });
+  // 휴대폰 브라우저: 링크는 미리 복사해 두어 인스타그램에서 붙여 넣을 수 있게 한다.
+  // Android 인스타그램의 글 받는 DM 화면(DirectShareHandlerActivity)은 BROWSABLE 이 아니라 Chrome 이 열 수 없다.
+  // SsalTech 앱(1.2.4+)이 있으면 ssaltech://dm 으로 앱을 거쳐 그 화면(받을 사람 고르기, 링크 채움)을 연다.
+  // 앱이 없으면 브라우저가 열 수 있는 DM 주소인 대화 목록(direct-inbox)을 연다.
+  // iPhone 인스타그램은 instagram://sharesheet 로 받을 사람 목록을 연다(문서에 없는 딥 링크).
+  if (mobileOS()) {
+    void copyText(url);
+    if (/Android/i.test(navigator.userAgent)) {
+      if (await openApp(`ssaltech://dm?title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`)) {
+        track("share", { net: "instagram_dm", target: key, via: "app" });
+        return;
+      }
+      if (await openApp("instagram://direct-inbox")) {
+        toast("링크를 복사했어요. 대화방에 붙여 넣어 주세요.");
+        track("share", { net: "instagram_dm", target: key, via: "inbox" });
+        return;
+      }
+    } else if (await openApp(`instagram://sharesheet?text=${encodeURIComponent(`${title}\n${url}`)}`)) {
+      track("share", { net: "instagram_dm", target: key, via: "sharesheet" });
       return;
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") return;
+    }
+    // 인스타그램 앱이 없으면 공유 시트. 사진 없이 링크만 보내야 DM 에 링크가 남는다.
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: title, url });
+        track("share", { net: "instagram_dm", target: key });
+        return;
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+      }
     }
   }
+  // 데스크톱: 웹에서 DM 에 글을 미리 채울 수는 없어, 받는 사람을 고르는 새 메시지 창을 열고 링크는 복사해 둔다.
   const copied = await copyText(url);
-  window.open("https://www.instagram.com/direct/inbox/", "_blank", "noopener,noreferrer");
-  toast(copied ? "링크를 복사했어요. 인스타그램 DM 창에 붙여 넣어 주세요." : "인스타그램 DM 창에 링크를 붙여 넣어 주세요.");
+  window.open("https://www.instagram.com/direct/new/", "_blank", "noopener,noreferrer");
+  toast(copied ? "링크를 복사했어요. 받을 사람을 고르고 붙여 넣어 주세요." : "받을 사람을 고르고 링크를 붙여 넣어 주세요.");
   track("share", { net: "instagram_dm", target: key });
 }
 

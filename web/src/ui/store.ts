@@ -3,7 +3,7 @@
 // 이 기기에만 저장하는 앱 상태(식당·알레르기·별점·알림 규칙)와 식단 불러오기.
 // 서버로 보내는 것은 식단 요청(식당·주)뿐이다.
 import { useEffect, useSyncExternalStore } from "react";
-import { addDays, kstToday, menuItems, mondayOf, type Dorm, type Meal, type WeekMenu, type Ymd } from "@/lib/menu";
+import { addDays, entryEnd, isWeekend, kstToday, menuItems, mondayOf, type Dorm, type Meal, type WeekMenu, type Ymd } from "@/lib/menu";
 
 // ---------- 알레르기 (식품 알레르기 표시 기준 1~19번) ----------
 
@@ -87,6 +87,11 @@ export interface Alarm {
   /** "fav"이면 즐겨찾기 알림: meal 대신 그날 세 끼에서 favs 메뉴를 찾아, 있을 때만 울린다. deliveredAlarms가 만든다. */
   kind?: "fav";
   favs?: string[];
+  /**
+   * 있으면 마감 알림: 그날 meal 입장 마감 before분 전에 울린다(offset은 0). 평일·주말 마감 시각이 달라
+   * deliveredAlarms가 평일·주말 규칙으로 나눠 time을 채운다. 저장된 time은 평일 기준 값이다.
+   */
+  before?: number;
 }
 
 /** 즐겨찾기 메뉴 알림 설정: offset일 뒤 메뉴에 즐겨찾기가 있으면 매일 time에 알린다. */
@@ -108,6 +113,8 @@ export interface AppState {
   /** 즐겨찾기한 메뉴 이름. 없던 시절 상태는 loadState가 별점 4점 이상으로 채운다. */
   favs?: string[];
   favAlarm?: FavAlarm;
+  /** 화면 테마. 없으면 기기 설정을 따른다. layout.tsx 의 THEME_SCRIPT 가 첫 화면 전에 이 값을 읽는다. */
+  theme?: "light" | "dark";
 }
 
 const KEY = "ssaltech_v1";
@@ -154,12 +161,35 @@ export const favAddedText = (s: AppState, name: string) =>
 
 export const FAV_MAX = 50;
 
-/** 기기·허브에 넘길 알림 목록: 내가 만든 규칙 + 즐겨찾기 알림(켜져 있고 즐겨찾기가 있을 때). */
+/** 마감 알림 분 고르기 */
+export const BEFORE_CHOICES = [10, 20, 30, 60] as const;
+export const BEFORE_MAX = 180;
+
+const hhmm = (min: number) => {
+  const m = Math.max(0, min);
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+};
+const minOf = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+
+/** 마감 알림이 평일·주말에 울리는 시각 */
+export const closeAlarmTime = (day: "weekday" | "weekend", meal: Meal, before: number) => hhmm(minOf(entryEnd(day, meal)) - before);
+
+/** 이 규칙이 d날에 울리는 시각 */
+export const alarmTimeOn = (a: Pick<Alarm, "time" | "meal" | "before">, d: Ymd) =>
+  a.before ? closeAlarmTime(isWeekend(d) ? "weekend" : "weekday", a.meal, a.before) : a.time;
+
+/** 기기·허브에 넘길 알림 목록: 내가 만든 규칙(마감 알림은 평일·주말로 나눔) + 즐겨찾기 알림(켜져 있고 즐겨찾기가 있을 때). */
 export function deliveredAlarms(s: AppState): Alarm[] {
+  const out = s.alarms.flatMap((a): Alarm[] => {
+    if (!a.before) return [a];
+    const before = a.before;
+    const days = a.repeat === "all" ? (["weekday", "weekend"] as const) : [a.repeat];
+    return days.map((day) => ({ ...a, id: `${a.id}-${day === "weekday" ? "wd" : "we"}`, offset: 0, repeat: day, time: closeAlarmTime(day, a.meal, before) }));
+  });
   const f = s.favAlarm;
   const favs = (s.favs ?? []).slice(0, FAV_MAX);
-  if (!f?.on || !favs.length) return s.alarms;
-  return [...s.alarms, { id: "fav", kind: "fav", favs, offset: f.offset, meal: "lunch", time: f.time, dorm: s.dorm, repeat: "all", on: true }];
+  if (!f?.on || !favs.length) return out;
+  return [...out, { id: "fav", kind: "fav", favs, offset: f.offset, meal: "lunch", time: f.time, dorm: s.dorm, repeat: "all", on: true }];
 }
 
 // ---------- 식단 불러오기 ----------

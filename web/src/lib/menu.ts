@@ -74,6 +74,8 @@ export const HOURS: Record<"weekday" | "weekend", Record<Meal, string>> = {
   weekend: { breakfast: "08:00~08:50", lunch: "12:30~13:20", dinner: "17:30~18:20" },
 };
 export const hoursOf = (d: Ymd, m: Meal) => HOURS[isWeekend(d) ? "weekend" : "weekday"][m];
+/** 입장 마감 시각 HH:MM */
+export const entryEnd = (day: "weekday" | "weekend", m: Meal) => HOURS[day][m].slice(6);
 
 /** 아직 끝나지 않은 가장 가까운 밥 */
 export function nextMeal(now = Date.now()): { date: Ymd; meal: Meal } {

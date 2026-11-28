@@ -20,6 +20,7 @@ import { AllergyPage } from "./AllergyPage";
 import { HomePage } from "./HomePage";
 import { MenuPage } from "./MenuPage";
 import { MyPage } from "./MyPage";
+import { useTheme } from "../theme";
 import { DeskCtx, useNow, useThumb, type Desk, type DTab, type Mode, type Sel } from "./shared";
 
 const DEFAULT_STATE: AppState = { dorm: "kb", allergy: [], rates: {}, alarms: [] };
@@ -52,6 +53,7 @@ const BURST = Array.from({ length: 14 }, (_, i) => {
 export function DesktopApp() {
   const [boot] = useState(bootFromUrl);
   const [s, setS] = useState<AppState>(() => loadState() ?? DEFAULT_STATE);
+  useTheme(s.theme);
   const update = useCallback((fn: (x: AppState) => void) => {
     setS((prev) => {
       const x: AppState = structuredClone(prev);
@@ -184,17 +186,19 @@ export function DesktopApp() {
           <span className="sp" />
           <div className="promo">
             <Mascot className="pm" />
-            <b>{pwa.installed ? "앱으로 보고 있어요" : "홈 화면에 추가하기"}</b>
-            <p>{pwa.installed ? "이 브라우저로 알림도 받을 수 있어요" : "앱처럼 열고, 알림도 이 브라우저로"}</p>
+            <b>{pwa.installed ? "앱으로 보고 있어요" : pwa.hasApp ? "앱이 설치돼 있어요" : "홈 화면에 추가하기"}</b>
+            <p>{pwa.installed ? "이 브라우저로 알림도 받을 수 있어요" : pwa.hasApp ? "설치한 앱에서 열어도 같은 식단이에요" : "앱처럼 열고, 알림도 이 브라우저로"}</p>
             <div className="stack">
-              {!pwa.installed && (
-                <button type="button" className="cta sm" onClick={() => void installApp()}>
-                  {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
-                </button>
+              {!pwa.hasApp && (
+                <>
+                  <button type="button" className="cta sm" onClick={() => void installApp()}>
+                    {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
+                  </button>
+                  <a className="cta sm apk" href={APK_URL} download>
+                    Android 앱 받기
+                  </a>
+                </>
               )}
-              <a className="cta sm apk" href={APK_URL} download>
-                Android 앱 받기
-              </a>
             </div>
           </div>
           <a className="tiny" href="/?ui=mobile">

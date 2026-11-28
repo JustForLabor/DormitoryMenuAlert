@@ -4,16 +4,23 @@
 .wlm{--bg:#F3F4F7;--card:#fff;--ink:#17191E;--ink2:#555C68;--ink3:#9AA0AB;--line:#ECEDF1;--brand:#FF6A45;--brand2:#FF5A7C;--leaf:#1FAE68;--blue:#3B6CFF;--pur:#7B61FF;--yel:#FFB020;--grad:linear-gradient(135deg,#FFA05E 0%,#FF6F6E 55%,#FF5C80 100%);--r:22px;--sh:0 1px 2px rgba(23,25,30,.04),0 6px 18px rgba(23,25,30,.05)}
 .wlm,.wlm *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 .wlm{min-height:100dvh}
-.wlm{font-family:var(--font-pretendard),"Pretendard Variable",Pretendard,-apple-system,sans-serif;color:var(--ink);background:#E7E9EF;letter-spacing:-.015em;-webkit-font-smoothing:antialiased}
+.wlm{font-family:"Pretendard Variable",Pretendard,-apple-system,"Noto Sans CJK KR",sans-serif;color:var(--ink);background:#E7E9EF;letter-spacing:-.015em;-webkit-font-smoothing:antialiased}
 .wlm button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .wlm input{font:inherit;color:inherit}
 .wlm svg{display:block}
 .wlm .stage{min-height:100dvh;display:flex;justify-content:center;align-items:center;gap:56px}
 .wlm .phone{position:relative;width:100%;max-width:430px;height:100dvh;background:var(--bg);overflow:hidden}
-@media (min-width:760px){.wlm{background:radial-gradient(1200px 600px at 20% 0%,#FFE9DA 0,transparent 60%),radial-gradient(900px 600px at 100% 100%,#E6E2FF 0,transparent 60%),#EEF0F4}
+/* 휴대폰·태블릿: 앱을 화면에 고정한다. 문서가 스크롤·바운스되지 않으니 모서리가 드러나지 않고,
+   dvh 를 잘못 계산하는 앱 안 브라우저(인스타그램 등)에서도 보이는 영역에 정확히 맞는다. */
+@media (max-width:1023.98px){.wlm{position:fixed;inset:0;min-height:0;overflow:hidden}
+.wlm .stage{min-height:0;height:100%}
+.wlm .phone{height:100%}
+}
+html:has(.wlm){-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* 넓은 화면에서 ?ui=mobile 로 볼 때만 휴대폰 틀을 씌운다 */
+@media (min-width:1024px){.wlm{background:radial-gradient(1200px 600px at 20% 0%,#FFE9DA 0,transparent 60%),radial-gradient(900px 600px at 100% 100%,#E6E2FF 0,transparent 60%),#EEF0F4}
 .wlm .stage{padding:24px}
 .wlm .phone{height:min(880px,calc(100vh - 48px));border-radius:44px;box-shadow:0 0 0 10px #17191E,0 0 0 11px #3a3d45,0 40px 80px rgba(23,25,30,.28)}
-
 }
 .wlm .scr{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:110px;display:none;scrollbar-width:none;overscroll-behavior:contain}
 .wlm .scr::-webkit-scrollbar{display:none}
@@ -132,6 +139,10 @@
 .wlm .seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .wlm .seg3 button{height:46px;border-radius:14px;border:1.5px solid var(--line);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
 .wlm .seg3 button.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.wlm .favc{display:grid;grid-template-columns:1fr 1fr 1.8fr;gap:8px;margin:0 0 12px}
+.wlm .favc button{height:46px;border-radius:14px;border:1.5px solid var(--line);font-size:14px;font-weight:700}
+.wlm .favc button.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.wlm .favc input{height:46px;border:0;border-radius:14px;background:#F4F5F8;padding:0 8px;font:inherit;font-size:15px;font-weight:700;min-width:0}
 .wlm .lc{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin:14px 16px 0;padding:22px 16px 6px}
 .wlm .lc h3{font-size:18px;font-weight:800;padding:0 4px 6px;letter-spacing:-.03em}
 .wlm .lr{display:flex;align-items:center;gap:14px;width:100%;padding:12px 4px;text-align:left}
@@ -287,7 +298,7 @@
 @keyframes ring{0%{transform:scale(1);opacity:.9}70%,100%{transform:scale(1.35);opacity:0}}
 .wlm .tabs .ctr:active .fab{transform:scale(.9)}
 .wlm .tabs .ctr.on .fab{transform:rotate(-8deg) scale(1.04)}
-.wlm .tabs .ctr span{margin-top:36px}
+.wlm .tabs .ctr>span:not(.fab){margin-top:36px}
 .wlm .lg-top{display:flex;justify-content:space-between;align-items:center;height:58px;padding:0 12px;background:#fff}
 .wlm .lg-top h1{flex:1;font-size:19px;font-weight:800;margin-left:4px}
 .wlm .lgw{background:#fff;min-height:calc(100% - 58px);padding:20px 22px 30px}
@@ -518,3 +529,109 @@
 .wlm .sico-x{background:#000}
 .wlm .sico-instagram,.wlm .sico-dm{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
 .wlm .sico-copy,.wlm .sico-more,.wlm .sico-back{background:#EEF0F3}
+
+/* 다크 모드: html[data-theme="dark"] 일 때만. 바탕 #0F1115 는 theme-color·Android 시스템 바와 같다. */
+html[data-theme="dark"] .wlm{--bg:#0F1115;--card:#181B21;--ink:#ECEEF2;--ink2:#B4B9C3;--ink3:#7E848F;--line:#2A2E36;--soft:#20242B;--sh:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.28);background:#0F1115}
+@media (min-width:1024px){html[data-theme="dark"] .wlm{background:radial-gradient(1200px 600px at 20% 0%,#2A1A12 0,transparent 60%),radial-gradient(900px 600px at 100% 100%,#1E1A33 0,transparent 60%),#0B0D10}}
+/* :is() 는 안에서 가장 센 선택자의 우선순위를 통째로 쓴다. 그래서 우선순위가 같은 것끼리만 묶어, 밝은 화면 규칙보다 한 단만 세게 한다
+   (그래야 .on 같은 상태 규칙을 덮지 않는다). */
+/* 흰 카드 → 카드색 */
+html[data-theme="dark"] .wlm :is(.qb,.qt,.sec,.pbtn,.bdg,.card,.lc,.mcard,.cal,.inp,.lock,.org,.kid-chip,.lg-top,.lgw,.ob,.sheet,.ptr-ind){background:var(--card)}
+html[data-theme="dark"] .wlm :is(.search>span,.wk button,.cafs button){background:var(--card)}
+html[data-theme="dark"] .wlm :is(.qs .tile,.lbtn.o){background:var(--card)}
+html[data-theme="dark"] .wlm .scr:has(.lgw),html[data-theme="dark"] .wlm .scr:has(.ob){background:var(--card)}
+html[data-theme="dark"] .wlm .obb{background:linear-gradient(transparent,var(--card) 30%)}
+html[data-theme="dark"] .wlm .tbar{background:rgba(15,17,21,.86)}
+html[data-theme="dark"] .wlm .tbar.w{background:rgba(24,27,33,.9)}
+html[data-theme="dark"] .wlm .tabs{background:rgba(24,27,33,.96);border-top-color:var(--line)}
+html[data-theme="dark"] .wlm .tabs .ctr .fab{box-shadow:0 0 0 5px var(--card),0 10px 22px rgba(255,79,123,.38)}
+/* 옅은 회색 칸 → 한 단 밝은 칸 */
+html[data-theme="dark"] .wlm :is(.notice,.segp,.up,.mys,.chip,.sbox,.rp-empty,.al-note,.fc,.mb,.prog){background:var(--soft)}
+html[data-theme="dark"] .wlm :is(.kc span,.favc input,.grd button,.lgo button,.tk-step button,.rp-stats>div,.rp-bar i,.nt span){background:var(--soft)}
+html[data-theme="dark"] .wlm :is(.ig .ic,.lr .sq,.nut .bar,.sch .sq,.lgm .bub,.rk2 .bar,.my-lo .my-cn,.alt.no){background:var(--soft)}
+html[data-theme="dark"] .wlm :is(.ml li .n i,.cafs button small.ct){background:var(--soft)}
+html[data-theme="dark"] .wlm .segp i{background:#2E333C;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+html[data-theme="dark"] .wlm .ib:active{background:rgba(255,255,255,.06)}
+html[data-theme="dark"] .wlm .cg button:not(.we):active{background:#262A32}
+html[data-theme="dark"] .wlm :is(.share-list .si:active,.cal .mnav:active){background:#262A32}
+html[data-theme="dark"] .wlm .lgw .lgo button:active{background:#262A32}
+html[data-theme="dark"] .wlm :is(.cta:disabled,.cta.dis){background:#2A2E36;color:#6B717C}
+html[data-theme="dark"] .wlm .ob .cta::before{background:#2A2E36}
+/* 위 칸 규칙이 덮은 선택 상태를 되살린다 */
+html[data-theme="dark"] .wlm .wk button.on{background:var(--grad)}
+html[data-theme="dark"] .wlm :is(.kid-chip.on,.grd button.on){background:var(--ink)}
+html[data-theme="dark"] .wlm .lr .sq.favi{background:linear-gradient(135deg,#FF9DB3,#FF5C80)}
+/* 선·테두리 */
+html[data-theme="dark"] .wlm :is(.sg,.risk,.cr){border-color:var(--line)}
+html[data-theme="dark"] .wlm .ml li{border-color:var(--line)}
+html[data-theme="dark"] .wlm .rate{border-top-color:#343944}
+html[data-theme="dark"] .wlm :is(.tl .it:before,.tl .dt){background:var(--line)}
+html[data-theme="dark"] .wlm .tl .it.ok .dt{background:var(--leaf)}
+html[data-theme="dark"] .wlm .tl .it.now .dt{background:var(--brand)}
+html[data-theme="dark"] .wlm .lock{border-color:#3A3F48}
+html[data-theme="dark"] .wlm .lbtn.o{border-color:#3A3F48}
+html[data-theme="dark"] .wlm :is(.sch .ck,.org .ck){border-color:#4A4F58}
+html[data-theme="dark"] .wlm .sheet .gr{background:#3A3F48}
+html[data-theme="dark"] .wlm .tg{background:#3A3F48}
+html[data-theme="dark"] .wlm .tg.on{background:var(--leaf)}
+/* 흐린 글자 */
+html[data-theme="dark"] .wlm .chev{color:#5C626D}
+html[data-theme="dark"] .wlm .ml .fv{color:#5C626D}
+html[data-theme="dark"] .wlm :is(.cg button.we b,.cg button.na b){color:#5C626D}
+html[data-theme="dark"] .wlm .cg button.td b{color:#fff}
+html[data-theme="dark"] .wlm .ml .fv.on{color:#FF5C80}
+html[data-theme="dark"] .wlm .more,html[data-theme="dark"] .wlm .ig span{color:var(--ink2)}
+/* 짙은 바탕 + 흰 글자였던 선택 상태: 바탕이 밝아지므로 글자를 어둡게 */
+html[data-theme="dark"] .wlm :is(.seg3 button.on,.favc button.on,.grd button.on){color:#111318}
+html[data-theme="dark"] .wlm :is(.kid-chip.on,.mys .q span){color:#111318}
+html[data-theme="dark"] .wlm .kid-chip.on small{color:rgba(17,19,24,.7)}
+html[data-theme="dark"] .wlm .cats button.on{background:var(--ink);color:#111318}
+html[data-theme="dark"] .wlm .wk button.td:after{background:var(--ink);color:#111318}
+html[data-theme="dark"] .wlm .upd,html[data-theme="dark"] .wlm .toast{background:rgba(236,238,242,.95);color:#111318}
+html[data-theme="dark"] .wlm .dim{background:rgba(0,0,0,.6)}
+html[data-theme="dark"] .wlm .cgr div.now i{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+html[data-theme="dark"] .wlm .prof{background:#1C2028;box-shadow:inset 0 0 0 1px var(--line)}
+/* 따뜻한 머리글·주황 칸 */
+html[data-theme="dark"] .wlm .hhead{background:linear-gradient(180deg,#24180F 0%,#1A1512 62%,var(--bg) 100%)}
+html[data-theme="dark"] .wlm .hhead:before{background:radial-gradient(circle,rgba(255,140,80,.2) 0,rgba(255,140,80,.08) 45%,transparent 70%)}
+html[data-theme="dark"] .wlm .ib .dot{box-shadow:0 0 0 2px #24180F}
+html[data-theme="dark"] .wlm .greet .hl{background:linear-gradient(transparent 62%,rgba(255,138,80,.38) 62%)}
+html[data-theme="dark"] .wlm :is(.role.on,.sch.on,.org.on,.rk2.me){background:#2B1F1A}
+html[data-theme="dark"] .wlm .rsv button.on{background:#2B1F1A}
+html[data-theme="dark"] .wlm .mcard .mh b,html[data-theme="dark"] .wlm .cr .cn{background:#2B1F1A;color:#FF9A6B}
+html[data-theme="dark"] .wlm .rsv button b{color:#FF9A6B}
+html[data-theme="dark"] .wlm .mcard.dn .mh b{background:#241F3D;color:#A595FF}
+html[data-theme="dark"] .wlm .push-note{background:#2B1F1A;color:#FFB08A}
+html[data-theme="dark"] .wlm .vtag{background:#2E2614;color:#F2C14E}
+/* 분홍(알레르기) 칸 */
+html[data-theme="dark"] .wlm .alert{background:#33191F;color:#FF7C9A}
+html[data-theme="dark"] .wlm .alert small{color:#D98A9C}
+html[data-theme="dark"] .wlm .ml li.hit,html[data-theme="dark"] .wlm .ahero h2 em{color:#FF7C9A}
+html[data-theme="dark"] .wlm .chip.on,html[data-theme="dark"] .wlm .nt span.on,html[data-theme="dark"] .wlm .up.on{background:#33191F;color:#FF7C9A}
+html[data-theme="dark"] .wlm .chip.mine{background:linear-gradient(135deg,#3A1A26,#2B1F1A);color:#FF8FAB;border-color:#5A2A38}
+html[data-theme="dark"] .wlm .risk .d{background:#33191F}
+html[data-theme="dark"] .wlm :is(.risk .d small,.risk .d b){color:#FF7C9A}
+html[data-theme="dark"] .wlm .al-note.bad{background:#33191F;color:#FF8A9A}
+html[data-theme="dark"] .wlm .al-note.ok,html[data-theme="dark"] .wlm .alt{background:#142A1F;color:#5ED69A}
+html[data-theme="dark"] .wlm .alt.no{background:var(--soft);color:var(--ink3)}
+html[data-theme="dark"] .wlm .al-note.ok b{color:#5ED69A}
+html[data-theme="dark"] .wlm :is(.cong.lo,.ct.lo){background:#142A1F;color:#5ED69A}
+html[data-theme="dark"] .wlm :is(.cong.md,.ct.md){background:#2E2614;color:#F2C14E}
+html[data-theme="dark"] .wlm :is(.cong.hi,.ct.hi){background:#33191F;color:#FF7C9A}
+/* 파스텔 큰 칸 */
+html[data-theme="dark"] .wlm .hero{background:linear-gradient(140deg,#2B1D1A 0%,#2A1A22 55%,#1F1C33 100%)}
+html[data-theme="dark"] .wlm .cats button{background:rgba(255,255,255,.08)}
+html[data-theme="dark"] .wlm .ahero{background:linear-gradient(150deg,#1A2033 0%,#211C33 60%,#2E1B24 100%)}
+html[data-theme="dark"] .wlm .poll button.op i{background:#241F3D}
+html[data-theme="dark"] .wlm .poll button.op.me i{background:linear-gradient(90deg,#2C2550,#3A3070)}
+/* 소식 배너는 밝은 파스텔 그대로 두고 글자만 진하게 */
+html[data-theme="dark"] .wlm .sl{--ink:#17191E;--ink2:#555C68;--ink3:#7A808B;color:#17191E}
+/* icons.ts 의 선 아이콘·탭 아이콘은 #17191E 로 그려져 있다. SVG 속성은 CSS 가 덮는다. */
+html[data-theme="dark"] .wlm [fill="#17191E" i]{fill:var(--ink)}
+html[data-theme="dark"] .wlm [stroke="#17191E" i]{stroke:var(--ink)}
+html[data-theme="dark"] .wlm :is(.sico-copy,.sico-more,.sico-back){background:#2A2E36}
+/* 태블릿(iPad 세로 등): 화면을 가득 채우고 내용·탭바·시트는 가운데 680px 단으로 모은다 */
+@media (min-width:600px) and (max-width:1023.98px){.wlm .phone{max-width:none}
+.wlm .scr,.wlm .tabs{padding-inline:max(0px,calc(50% - 340px))}
+.wlm .sheet{left:max(0px,calc(50% - 340px));right:max(0px,calc(50% - 340px))}
+}

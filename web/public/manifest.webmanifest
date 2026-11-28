@@ -12,6 +12,10 @@
   "background_color": "#F3F4F7",
   "theme_color": "#F3F4F7",
   "categories": ["food", "lifestyle"],
+  "related_applications": [
+    { "platform": "play", "id": "kr.pe.ybkim.ssaltech" },
+    { "platform": "webapp", "url": "https://dorm.ybkim.pe.kr/manifest.webmanifest", "id": "https://dorm.ybkim.pe.kr/" }
+  ],
   "icons": [
     { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

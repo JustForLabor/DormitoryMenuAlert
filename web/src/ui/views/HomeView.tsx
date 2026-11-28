@@ -9,7 +9,7 @@ import { PullToRefresh } from "../motion";
 import { bridge } from "../native";
 import { dishes, hits, refreshWeeks, useWeeks } from "../store";
 import { AlTile, BanBlock, CrRow, HitBox, Hdr, Ico, Icon, IgBlock, Mascot, RateBlock, Roll, st, type Banner } from "../kit";
-import { AppSheet, CliSheet, DORM_ICON, DormSheet, HoursSheet, InboxSheet, ReportSheet, SearchSheet, nearMondays, useNotices } from "../sheets";
+import { AppSheet, DORM_ICON, DataSheet, DormSheet, HoursSheet, InboxSheet, ReportSheet, SearchSheet, nearMondays, useNotices } from "../sheets";
 import { ShareSheet, toShareMeal } from "../share";
 
 const startMin = (range: string) => {
@@ -50,7 +50,7 @@ function MealRows({ day, next }: { day: DayMenu; next: { date: Ymd; meal: Meal }
 }
 
 export function HomeView() {
-  const { s, go, sheet, closeSheet, setSel, setMView, setDormSel, toast } = useMobile();
+  const { s, go, sheet, closeSheet, setSel, setMView, setDormSel, toast, pwa } = useMobile();
   const [rev, setRev] = useState(0);
   const dorm = dormOf(s.dorm);
   const today = kstToday();
@@ -65,7 +65,8 @@ export function HomeView() {
   const nday = dayOf(nm.date);
   const curWeek = entries[1];
   const notices = useNotices(s.dorm);
-  const inApp = !!bridge();
+  /** Android 앱 안이거나, 이 기기에 앱(Android 앱·홈 화면 앱)이 설치돼 있으면 앱 받기 안내를 숨긴다. */
+  const installed = !!bridge() || pwa.hasApp;
   const nmLabel = `${nm.date === today ? "오늘" : "내일"} ${MEAL_NAME[nm.meal]}`;
   const pick = nday?.registered ? mainDish(nday.meals[nm.meal]) : "";
   const upcoming = days.filter((d) => d.date >= today);
@@ -123,14 +124,6 @@ export function HomeView() {
       ill: "moa",
       size: 116,
       go: () => sheet(<ReportSheet key={Date.now()} />),
-    },
-    {
-      bg: "linear-gradient(120deg,#E3EEFF,#D6E4FF)",
-      t: ["터미널에서도", "dorm-menu 한 줄이면"],
-      d: "SsalTech의 원조, C로 만든 명령줄 버전",
-      ill: "clip",
-      size: 110,
-      go: () => sheet(<CliSheet />),
     },
   ];
 
@@ -263,7 +256,7 @@ export function HomeView() {
               { icon: "shield", label: "알레르기", onClick: () => go("allergy") },
               { icon: "star", label: "내 기록", onClick: () => sheet(<ReportSheet key={Date.now()} />) },
               { icon: "mega", label: "소식", onClick: () => sheet(<InboxSheet key={Date.now()} />), badge: notices.length ? "NEW" : undefined, tone: "live" },
-              { icon: "gift", label: inApp ? "터미널" : "앱 받기", onClick: () => sheet(inApp ? <CliSheet /> : <AppSheet />) },
+              installed ? { icon: "lock", label: "데이터", onClick: () => sheet(<DataSheet />) } : { icon: "gift", label: "앱 받기", onClick: () => sheet(<AppSheet />) },
               { icon: "uni", label: "식당 변경", onClick: () => sheet(<DormSheet />) },
             ]}
           />
@@ -325,7 +318,7 @@ export function HomeView() {
             </p>
             <Icon k="chev" />
           </button>
-          {!inApp && (
+          {!installed && (
             <button className="lr press" onClick={() => sheet(<AppSheet />)}>
               <span className="sq">
                 {/* eslint-disable-next-line @next/next/no-img-element -- static app icon */}
@@ -337,15 +330,6 @@ export function HomeView() {
               <Icon k="chev" />
             </button>
           )}
-          <button className="lr press" onClick={() => sheet(<CliSheet />)}>
-            <span className="sq">
-              <Icon k="clip" />
-            </span>
-            <p>
-              터미널에서 보기<small>dorm-menu 명령 · Linux·macOS·Solaris</small>
-            </p>
-            <Icon k="chev" />
-          </button>
         </div>
         <p className="foot">
           식단 출처: 서울과학기술대학교 생활관 홈페이지

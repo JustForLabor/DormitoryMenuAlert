@@ -3,6 +3,7 @@ import "@/ui/mobile.css";
 import "@/ui/motion.css";
 import "@/ui/views.css";
 import "@/ui/desktop/desktop.css";
+import { THEME_BG, THEME_SCRIPT } from "@/lib/theme";
 
 const DESCRIPTION = "서울과학기술대학교 생활관(KB·성림·수림학사) 식단을 주간·월간으로 보고, 알레르기 메뉴를 짚고, 정한 시각에 메뉴 알림을 받는 비공식 앱.";
 
@@ -51,13 +52,18 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#F3F4F7",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: THEME_BG.light },
+    { media: "(prefers-color-scheme: dark)", color: THEME_BG.dark },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    // data-theme 은 THEME_SCRIPT 가 첫 화면 전에 정하므로 서버 HTML 과 다르다.
+    <html lang="ko" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
         <script defer src="https://hub.ybkim.pe.kr/t.js" data-site="dorm" />
