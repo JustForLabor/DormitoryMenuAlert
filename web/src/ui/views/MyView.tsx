@@ -211,7 +211,7 @@ export function MyView() {
         <a href={REPO_URL} target="_blank" rel="noreferrer">
           소스 코드
         </a>
-        {!app && (
+        {!app && !pwa.installed && (
           <>
             {" · "}
             <a href={APK_URL} download>

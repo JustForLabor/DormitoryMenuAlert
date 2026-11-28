@@ -50,7 +50,7 @@ function MealRows({ day, next }: { day: DayMenu; next: { date: Ymd; meal: Meal }
 }
 
 export function HomeView() {
-  const { s, go, sheet, closeSheet, setSel, setMView, setDormSel, toast } = useMobile();
+  const { s, go, sheet, closeSheet, setSel, setMView, setDormSel, toast, pwa } = useMobile();
   const [rev, setRev] = useState(0);
   const dorm = dormOf(s.dorm);
   const today = kstToday();
@@ -65,7 +65,8 @@ export function HomeView() {
   const nday = dayOf(nm.date);
   const curWeek = entries[1];
   const notices = useNotices(s.dorm);
-  const inApp = !!bridge();
+  /** Android 앱 안이거나 홈 화면에 설치한 앱으로 열었으면 앱 받기 안내를 숨긴다. */
+  const installed = !!bridge() || pwa.installed;
   const nmLabel = `${nm.date === today ? "오늘" : "내일"} ${MEAL_NAME[nm.meal]}`;
   const pick = nday?.registered ? mainDish(nday.meals[nm.meal]) : "";
   const upcoming = days.filter((d) => d.date >= today);
@@ -255,7 +256,7 @@ export function HomeView() {
               { icon: "shield", label: "알레르기", onClick: () => go("allergy") },
               { icon: "star", label: "내 기록", onClick: () => sheet(<ReportSheet key={Date.now()} />) },
               { icon: "mega", label: "소식", onClick: () => sheet(<InboxSheet key={Date.now()} />), badge: notices.length ? "NEW" : undefined, tone: "live" },
-              inApp ? { icon: "lock", label: "데이터", onClick: () => sheet(<DataSheet />) } : { icon: "gift", label: "앱 받기", onClick: () => sheet(<AppSheet />) },
+              installed ? { icon: "lock", label: "데이터", onClick: () => sheet(<DataSheet />) } : { icon: "gift", label: "앱 받기", onClick: () => sheet(<AppSheet />) },
               { icon: "uni", label: "식당 변경", onClick: () => sheet(<DormSheet />) },
             ]}
           />
@@ -317,7 +318,7 @@ export function HomeView() {
             </p>
             <Icon k="chev" />
           </button>
-          {!inApp && (
+          {!installed && (
             <button className="lr press" onClick={() => sheet(<AppSheet />)}>
               <span className="sq">
                 {/* eslint-disable-next-line @next/next/no-img-element -- static app icon */}

@@ -218,7 +218,7 @@ function CompareCol({ dorm, date, meal, i }: { dorm: Dorm; date: Ymd; meal: Meal
 }
 
 function AlarmBanner() {
-  const { s, go } = useDesk();
+  const { s, go, pwa } = useDesk();
   const on = s.alarms.filter((a) => a.on).length;
   return (
     <section className="banner pink st" style={st(6)}>
@@ -229,9 +229,11 @@ function AlarmBanner() {
         </h3>
         <p>{on ? `알림 규칙 ${on}개 · 이 브라우저나 Android 앱이 울려요` : "이 브라우저로도, Android 앱으로도 알림을 받을 수 있어요"}</p>
         <div className="acts">
-          <a className="cta sm" href={APK_URL} download>
-            Android 앱 받기
-          </a>
+          {!pwa.installed && (
+            <a className="cta sm" href={APK_URL} download>
+              Android 앱 받기
+            </a>
+          )}
           <button className="ghost sm" onClick={() => go("alarm")}>
             알림 규칙
           </button>

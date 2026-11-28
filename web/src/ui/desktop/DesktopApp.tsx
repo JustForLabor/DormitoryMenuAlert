@@ -190,13 +190,15 @@ export function DesktopApp() {
             <p>{pwa.installed ? "이 브라우저로 알림도 받을 수 있어요" : "앱처럼 열고, 알림도 이 브라우저로"}</p>
             <div className="stack">
               {!pwa.installed && (
-                <button type="button" className="cta sm" onClick={() => void installApp()}>
-                  {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
-                </button>
+                <>
+                  <button type="button" className="cta sm" onClick={() => void installApp()}>
+                    {pwa.ios ? "홈 화면에 추가" : "앱으로 설치"}
+                  </button>
+                  <a className="cta sm apk" href={APK_URL} download>
+                    Android 앱 받기
+                  </a>
+                </>
               )}
-              <a className="cta sm apk" href={APK_URL} download>
-                Android 앱 받기
-              </a>
             </div>
           </div>
           <a className="tiny" href="/?ui=mobile">
