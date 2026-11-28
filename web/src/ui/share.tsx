@@ -156,11 +156,10 @@ function mobileOS(): boolean {
 }
 
 /**
- * 인스타그램 앱의 공유 시트(받을 사람·대화방 목록)를 바로 연다. instagram://sharesheet?text= 는 문서에 없는 딥 링크다.
- * 앱이 열려 이 페이지가 가려지면 true, 1.5초 안에 안 열리면(앱이 없으면) false.
+ * 인스타그램 앱 딥 링크를 연다. 앱이 열려 이 페이지가 가려지면 true, 1.5초 안에 안 열리면(앱이 없으면) false.
  * 사용자 활성화(Chrome 5초)가 남아 있어 false 뒤에도 navigator.share 를 띄울 수 있다.
  */
-function openInstagramSharesheet(text: string): Promise<boolean> {
+function openApp(href: string): Promise<boolean> {
   return new Promise((resolve) => {
     const finish = (ok: boolean) => {
       document.removeEventListener("visibilitychange", onVis);
@@ -173,7 +172,7 @@ function openInstagramSharesheet(text: string): Promise<boolean> {
     document.addEventListener("visibilitychange", onVis);
     window.addEventListener("pagehide", onHide);
     const timer = setTimeout(() => finish(false), 1500);
-    location.href = `instagram://sharesheet?text=${encodeURIComponent(text)}`;
+    location.href = href;
   });
 }
 
@@ -197,11 +196,17 @@ async function shareInstagramDm(meal: ShareMeal, toast: (m: string) => void) {
     track("share", { net: "instagram_dm", target: key });
     return;
   }
-  // 휴대폰 브라우저: 인스타그램 앱의 받을 사람 목록을 바로 연다. 링크는 미리 복사해 두어 다른 화면이 열려도 붙여 넣을 수 있게 한다.
+  // 휴대폰 브라우저: 링크는 미리 복사해 두어 인스타그램에서 붙여 넣을 수 있게 한다.
+  // iPhone 인스타그램은 instagram://sharesheet 로 받을 사람 목록을 연다(문서에 없는 딥 링크).
+  // Android 인스타그램에는 그 주소가 없고, 글을 받는 DM 화면(DirectShareHandlerActivity)은 BROWSABLE 이 아니라
+  // Chrome 이 열 수 없다. 브라우저가 열 수 있는 DM 주소는 대화 목록(direct-inbox)뿐이다.
   if (mobileOS()) {
     void copyText(url);
-    if (await openInstagramSharesheet(`${title}\n${url}`)) {
-      track("share", { net: "instagram_dm", target: key, via: "sharesheet" });
+    const android = /Android/i.test(navigator.userAgent);
+    const href = android ? "instagram://direct-inbox" : `instagram://sharesheet?text=${encodeURIComponent(`${title}\n${url}`)}`;
+    if (await openApp(href)) {
+      if (android) toast("링크를 복사했어요. 대화방에 붙여 넣어 주세요.");
+      track("share", { net: "instagram_dm", target: key, via: android ? "inbox" : "sharesheet" });
       return;
     }
     // 인스타그램 앱이 없으면 공유 시트. 사진 없이 링크만 보내야 DM 에 링크가 남는다.
