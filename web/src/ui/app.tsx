@@ -26,7 +26,7 @@ import { isDorm, isMeal, isYmd, kstToday, type Dorm, type Meal, type Ymd } from 
 import { FAB_BELL, ICON_DEFS, TAB_ICON } from "./icons";
 import { useInstall, type InstallState } from "./install";
 import { haptic, motion, prefersReducedMotion, SCREEN_IN, SCREEN_OUT, type MotionType } from "./motion";
-import { pushAlarms } from "./native";
+import { pushAlarms, useUpdateNudge } from "./native";
 import { hideSsrHome } from "./ssr";
 import { syncPushAlarms } from "./webpush";
 import { deliveredAlarms, loadState, saveState, type Alarm, type AppState } from "./store";
@@ -531,6 +531,7 @@ export function MobileApp() {
   }, []);
 
   const pwa = useInstall(onInstalled);
+  useUpdateNudge();
 
   const ctx = useMemo<MobileCtx>(
     () => ({
