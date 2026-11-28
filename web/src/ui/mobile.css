@@ -291,7 +291,7 @@
 @keyframes ring{0%{transform:scale(1);opacity:.9}70%,100%{transform:scale(1.35);opacity:0}}
 .wlm .tabs .ctr:active .fab{transform:scale(.9)}
 .wlm .tabs .ctr.on .fab{transform:rotate(-8deg) scale(1.04)}
-.wlm .tabs .ctr span{margin-top:36px}
+.wlm .tabs .ctr>span:not(.fab){margin-top:36px}
 .wlm .lg-top{display:flex;justify-content:space-between;align-items:center;height:58px;padding:0 12px;background:#fff}
 .wlm .lg-top h1{flex:1;font-size:19px;font-weight:800;margin-left:4px}
 .wlm .lgw{background:#fff;min-height:calc(100% - 58px);padding:20px 22px 30px}

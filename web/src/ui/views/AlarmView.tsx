@@ -338,11 +338,7 @@ export function AlarmView() {
           지금 시험 알림 받아 보기
         </button>
       )}
-      <p className="foot">
-        알림이 울릴 때 생활관 홈페이지에서 그 메뉴를 새로 받아 보여 줘요.
-        <br />
-        터미널 버전의 <code>dorm-menu alarm add 내일 아침 21:00 kb</code>와 같은 규칙이에요.
-      </p>
+      <p className="foot">알림이 울릴 때 생활관 홈페이지에서 그 메뉴를 새로 받아 보여 줘요.</p>
     </>
   );
 }

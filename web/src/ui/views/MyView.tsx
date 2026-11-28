@@ -10,7 +10,7 @@ import { THEME_CHOICES } from "../theme";
 import { APK_URL, bridge, useAppUpdate, type AppUpdate } from "../native";
 import { AL, favorites, ratingCount } from "../store";
 import { Ico, Icon, Mascot, st } from "../kit";
-import { AppSheet, CliSheet, DORM_ICON, DataSheet, DormSheet, HoursSheet, InboxSheet, REPO_URL, ReportSheet, ResetSheet } from "../sheets";
+import { AppSheet, DORM_ICON, DataSheet, DormSheet, HoursSheet, InboxSheet, REPO_URL, ReportSheet, ResetSheet } from "../sheets";
 import { AllergySheet } from "./AllergyView";
 
 export function MyView() {
@@ -201,15 +201,6 @@ export function MyView() {
           </span>
           <p>
             주간·월간 내 기록<small>별점·좋아하는 메뉴·다가오는 날</small>
-          </p>
-          <Icon k="chev" />
-        </button>
-        <button className="lr press" onClick={() => sheet(<CliSheet />)}>
-          <span className="sq">
-            <Icon k="clip" />
-          </span>
-          <p>
-            터미널 버전 dorm-menu<small>서버 터미널에서 식단·알림</small>
           </p>
           <Icon k="chev" />
         </button>

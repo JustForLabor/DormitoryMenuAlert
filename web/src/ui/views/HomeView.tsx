@@ -9,7 +9,7 @@ import { PullToRefresh } from "../motion";
 import { bridge } from "../native";
 import { dishes, hits, refreshWeeks, useWeeks } from "../store";
 import { AlTile, BanBlock, CrRow, HitBox, Hdr, Ico, Icon, IgBlock, Mascot, RateBlock, Roll, st, type Banner } from "../kit";
-import { AppSheet, CliSheet, DORM_ICON, DormSheet, HoursSheet, InboxSheet, ReportSheet, SearchSheet, nearMondays, useNotices } from "../sheets";
+import { AppSheet, DORM_ICON, DataSheet, DormSheet, HoursSheet, InboxSheet, ReportSheet, SearchSheet, nearMondays, useNotices } from "../sheets";
 import { ShareSheet, toShareMeal } from "../share";
 
 const startMin = (range: string) => {
@@ -123,14 +123,6 @@ export function HomeView() {
       ill: "moa",
       size: 116,
       go: () => sheet(<ReportSheet key={Date.now()} />),
-    },
-    {
-      bg: "linear-gradient(120deg,#E3EEFF,#D6E4FF)",
-      t: ["터미널에서도", "dorm-menu 한 줄이면"],
-      d: "SsalTech의 원조, C로 만든 명령줄 버전",
-      ill: "clip",
-      size: 110,
-      go: () => sheet(<CliSheet />),
     },
   ];
 
@@ -263,7 +255,7 @@ export function HomeView() {
               { icon: "shield", label: "알레르기", onClick: () => go("allergy") },
               { icon: "star", label: "내 기록", onClick: () => sheet(<ReportSheet key={Date.now()} />) },
               { icon: "mega", label: "소식", onClick: () => sheet(<InboxSheet key={Date.now()} />), badge: notices.length ? "NEW" : undefined, tone: "live" },
-              { icon: "gift", label: inApp ? "터미널" : "앱 받기", onClick: () => sheet(inApp ? <CliSheet /> : <AppSheet />) },
+              inApp ? { icon: "lock", label: "데이터", onClick: () => sheet(<DataSheet />) } : { icon: "gift", label: "앱 받기", onClick: () => sheet(<AppSheet />) },
               { icon: "uni", label: "식당 변경", onClick: () => sheet(<DormSheet />) },
             ]}
           />
@@ -337,15 +329,6 @@ export function HomeView() {
               <Icon k="chev" />
             </button>
           )}
-          <button className="lr press" onClick={() => sheet(<CliSheet />)}>
-            <span className="sq">
-              <Icon k="clip" />
-            </span>
-            <p>
-              터미널에서 보기<small>dorm-menu 명령 · Linux·macOS·Solaris</small>
-            </p>
-            <Icon k="chev" />
-          </button>
         </div>
         <p className="foot">
           식단 출처: 서울과학기술대학교 생활관 홈페이지
