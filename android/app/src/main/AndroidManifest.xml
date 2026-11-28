@@ -36,6 +36,22 @@
             </intent-filter>
         </activity>
 
+        <!-- 휴대폰 브라우저의 인스타그램 DM 버튼: ssaltech://dm?title=…&url=… 를 인스타그램 DM 화면으로 넘긴다 -->
+        <activity
+            android:name=".ShareRelayActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="ssaltech" android:host="dm" />
+            </intent-filter>
+        </activity>
+
         <receiver
             android:name=".AlarmReceiver"
             android:exported="false" />
