@@ -4,7 +4,7 @@
 .wlm{--bg:#F3F4F7;--card:#fff;--ink:#17191E;--ink2:#555C68;--ink3:#9AA0AB;--line:#ECEDF1;--brand:#FF6A45;--brand2:#FF5A7C;--leaf:#1FAE68;--blue:#3B6CFF;--pur:#7B61FF;--yel:#FFB020;--grad:linear-gradient(135deg,#FFA05E 0%,#FF6F6E 55%,#FF5C80 100%);--r:22px;--sh:0 1px 2px rgba(23,25,30,.04),0 6px 18px rgba(23,25,30,.05)}
 .wlm,.wlm *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 .wlm{min-height:100dvh}
-.wlm{font-family:var(--font-pretendard),"Pretendard Variable",Pretendard,-apple-system,sans-serif;color:var(--ink);background:#E7E9EF;letter-spacing:-.015em;-webkit-font-smoothing:antialiased}
+.wlm{font-family:"Pretendard Variable",Pretendard,-apple-system,"Noto Sans CJK KR",sans-serif;color:var(--ink);background:#E7E9EF;letter-spacing:-.015em;-webkit-font-smoothing:antialiased}
 .wlm button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .wlm input{font:inherit;color:inherit}
 .wlm svg{display:block}
