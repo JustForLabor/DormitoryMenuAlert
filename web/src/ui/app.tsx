@@ -29,7 +29,7 @@ import { haptic, motion, prefersReducedMotion, SCREEN_IN, SCREEN_OUT, type Motio
 import { pushAlarms } from "./native";
 import { hideSsrHome } from "./ssr";
 import { syncPushAlarms } from "./webpush";
-import { loadState, saveState, type AppState } from "./store";
+import { deliveredAlarms, loadState, saveState, type Alarm, type AppState } from "./store";
 import { Svg } from "./kit";
 import { HomeView } from "./views/HomeView";
 import { MenuView } from "./views/MenuView";
@@ -379,13 +379,14 @@ export function MobileApp() {
     setS(s);
   }, []);
 
-  // 알림 규칙이 바뀔 때마다 Android 앱과, 구독 중이면 웹 푸시 서버에 넘긴다.
-  const alarms = S?.alarms;
+  // 알림 규칙(즐겨찾기 알림 포함)이 바뀔 때마다 Android 앱과, 구독 중이면 웹 푸시 서버에 넘긴다.
+  const delivered = S ? JSON.stringify(deliveredAlarms(S)) : null;
   useEffect(() => {
-    if (!alarms) return;
-    pushAlarms(alarms);
-    void syncPushAlarms(alarms, toast);
-  }, [alarms, toast]);
+    if (!delivered) return;
+    const list = JSON.parse(delivered) as Alarm[];
+    pushAlarms(list);
+    void syncPushAlarms(list, toast);
+  }, [delivered, toast]);
 
   // ---------- sheet ----------
 

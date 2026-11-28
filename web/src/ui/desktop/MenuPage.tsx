@@ -22,10 +22,11 @@ import {
   type Meal,
   type Ymd,
 } from "@/lib/menu";
+import { trackRate } from "@/lib/track";
 import { Ico } from "../kit";
 import { DORM_ICON } from "../sheets";
 import { ShareButton, toShareMeal } from "../share";
-import { AL, dishes, favorites, hits, loadable, refreshWeeks, useDay, useWeeks, type Dish } from "../store";
+import { AL, dishes, favAddedText, favorites, hits, loadable, refreshWeeks, setFav, useDay, useWeeks, type Dish } from "../store";
 import { MEAL_ICO, Search, Seg, Stars, dayLabel, fixedDishes, monthMondays, st, useDesk, weekDates } from "./shared";
 
 export function MenuPage() {
@@ -303,15 +304,22 @@ function DetailPanel() {
   const rates = s.rates[sel.date] ?? {};
   const rateable = list.filter((x) => !x[0].startsWith("선택식"));
   const fav = favorites(s);
+  const toggleFav = (name: string) => {
+    const on = !fav.has(name);
+    update((x) => setFav(x, name, on));
+    toast(on ? favAddedText(s, name) : `${name} 즐겨찾기를 뺐어요`);
+  };
   const rate = (name: string, n: number, el: HTMLElement) => {
     update((x) => {
       x.rates[sel.date] = { ...(x.rates[sel.date] ?? {}), [name]: n };
+      if (n >= 4) setFav(x, name, true);
     });
+    if (rates[name] !== n) trackRate({ dorm: view, date: sel.date, meal: sel.meal, dish: name, n });
     if (n === 5) {
       const r = el.getBoundingClientRect();
       burst(r.left + r.width / 2, r.top + r.height / 2);
     }
-    if (n >= 4 && !fav.has(name)) toast(`${name} · 좋아하는 메뉴로 기억할게요 ♥`);
+    if (n >= 4 && !fav.has(name)) toast(favAddedText(s, name));
   };
   return (
     <aside className="panel" aria-label="고른 메뉴">
@@ -376,10 +384,7 @@ function DetailPanel() {
               <ul className="dl">
                 {list.map(([name, ns], i) => (
                   <li key={`${i}-${name}`} className={ns.some((n) => s.allergy.includes(n)) ? "h" : ""} style={st(i)}>
-                    <span className="nm">
-                      {name}
-                      {fav.has(name) && <em> ♥</em>}
-                    </span>
+                    <span className="nm">{name}</span>
                     <span className="al">
                       {ns.map((n) => (
                         <i key={n} className={s.allergy.includes(n) ? "h" : ""} title={AL[n]}>
@@ -387,13 +392,20 @@ function DetailPanel() {
                         </i>
                       ))}
                     </span>
+                    {name.startsWith("선택식") ? (
+                      <span className="fv" aria-hidden="true" />
+                    ) : (
+                      <button className={`fv${fav.has(name) ? " on" : ""}`} aria-pressed={fav.has(name)} aria-label={`${name} 즐겨찾기`} title="즐겨찾기" onClick={() => toggleFav(name)}>
+                        {fav.has(name) ? "♥" : "♡"}
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
               {sel.date <= today && rateable.length > 0 && (
                 <div className="rate">
                   <h4>먹어 봤다면 별점</h4>
-                  <p>이 기기에만 남고, 4점 이상은 식단표에 ♥로 보여요</p>
+                  <p>4점 이상 주면 즐겨찾기(♥)에 넣어요 · 별점은 익명으로 모아 메뉴 통계에 써요</p>
                   {rateable.map(([name]) => (
                     <div className="rrow" key={name}>
                       <span>{name}</span>

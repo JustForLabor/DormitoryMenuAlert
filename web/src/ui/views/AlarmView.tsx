@@ -7,10 +7,11 @@ import { DORMS, MEALS, MEAL_NAME, addDays, dormOf, isWeekend, kstMinute, kstToda
 import { useMobile } from "../app";
 import { haptic } from "../motion";
 import { bridge, useNativeState } from "../native";
-import type { Alarm, Repeat } from "../store";
+import { deliveredAlarms, type Alarm, type Repeat } from "../store";
 import { Ico, Icon, Mascot, st } from "../kit";
 import { AppSheet, DORM_ICON } from "../sheets";
 import { WebPushCard } from "../WebPushCard";
+import { FavAlarmCard } from "../FavAlarmCard";
 
 const REPEAT_NAME: Record<Repeat, string> = { all: "매일", weekday: "평일", weekend: "주말" };
 const DAY_NAME = ["오늘", "내일"] as const;
@@ -121,7 +122,7 @@ function StatusCard() {
   const { sheet, toast, s } = useMobile();
   const ns = useNativeState();
   if (ns === "web") {
-    return <WebPushCard alarms={s.alarms} toast={toast} variant="mobile" onApk={() => sheet(<AppSheet />)} />;
+    return <WebPushCard alarms={deliveredAlarms(s)} toast={toast} variant="mobile" onApk={() => sheet(<AppSheet />)} />;
   }
   if (ns.permission !== "granted") {
     return (
@@ -194,6 +195,7 @@ export function AlarmView() {
         </button>
       </div>
       <StatusCard />
+      <FavAlarmCard s={s} update={update} toast={toast} variant="mobile" />
       {upcoming && (
         <div className="prof st" style={st(1)}>
           <div className="row">

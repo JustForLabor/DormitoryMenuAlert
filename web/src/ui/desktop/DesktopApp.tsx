@@ -14,7 +14,7 @@ import { Mascot, Svg } from "../kit";
 import { APK_URL, pushAlarms } from "../native";
 import { hideSsrHome } from "../ssr";
 import { syncPushAlarms } from "../webpush";
-import { loadState, saveState, type AppState } from "../store";
+import { deliveredAlarms, loadState, saveState, type Alarm, type AppState } from "../store";
 import { AlarmPage } from "./AlarmPage";
 import { AllergyPage } from "./AllergyPage";
 import { HomePage } from "./HomePage";
@@ -140,10 +140,12 @@ export function DesktopApp() {
   useLayoutEffect(() => {
     hideSsrHome();
   }, []);
+  const delivered = JSON.stringify(deliveredAlarms(s));
   useEffect(() => {
-    pushAlarms(s.alarms);
-    void syncPushAlarms(s.alarms, toast);
-  }, [s.alarms, toast]);
+    const list = JSON.parse(delivered) as Alarm[];
+    pushAlarms(list);
+    void syncPushAlarms(list, toast);
+  }, [delivered, toast]);
   const installApp = async () => {
     const r = await pwa.install();
     if (r === "manual") toast(pwa.ios ? "Safari 공유 → 홈 화면에 추가를 눌러 주세요" : "브라우저 메뉴에서 앱 설치를 눌러 주세요");

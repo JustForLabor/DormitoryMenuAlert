@@ -387,9 +387,10 @@ export function CliSheet() {
 export function DataSheet() {
   const rows: (readonly [IconName, string, string])[] = [
     ["cal", "식단", "생활관 홈페이지 식단표를 그대로 옮겨요. 서버는 식당·주만 받아 3~12시간 캐시해요"],
-    ["lock", "알레르기·별점·알림 규칙", "이 기기에만 저장하고 서버로 보내지 않아요"],
+    ["lock", "알레르기", "이 기기에만 저장하고 서버로 보내지 않아요"],
+    ["star", "별점", "메뉴 통계를 내려고 익명 방문자 번호와 함께 서버에 모아요. 이름·연락처는 받지 않아요"],
     ["shield", "알레르기 표시", "식단표에 번호가 없어서 메뉴 이름으로 짐작해요. 소스·반죽 재료는 못 잡아요"],
-    ["bell", "알림", "Android 앱이 정한 시각에 메뉴를 받아 이 기기에서 띄워요"],
+    ["bell", "알림", "Android 앱은 정한 시각에 메뉴를 받아 이 기기에서 띄워요. 웹 알림은 정한 시각을 서버에 맡겨 보내요"],
   ];
   return (
     <>
@@ -446,7 +447,7 @@ export function ReportSheet() {
   return (
     <>
       <h3>내 기록</h3>
-      <p className="sd">이 기기에 남긴 별점 · 서버로 보내지 않아요</p>
+      <p className="sd">이 기기에 남긴 별점 · 메뉴 통계에는 익명으로 모아요</p>
       <div className="seg3" role="tablist" aria-label="기간" style={{ gridTemplateColumns: "1fr 1fr", marginTop: 14 }}>
         {(["w", "m"] as const).map((k) => (
           <button key={k} role="tab" aria-selected={p === k} className={p === k ? "on" : ""} onClick={() => setP(k)}>
@@ -499,7 +500,7 @@ export function ReportSheet() {
           </div>
         ))
       ) : (
-        <p className="sub mt">다음 주까지는 없어요. 4점 이상 준 메뉴가 다시 나오면 여기에 떠요.</p>
+        <p className="sub mt">다음 주까지는 없어요. 즐겨찾기(♥)한 메뉴가 다시 나오면 여기에 떠요.</p>
       )}
       <button
         className="more"

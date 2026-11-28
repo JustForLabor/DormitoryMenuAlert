@@ -105,7 +105,7 @@ export function MenuView() {
             {list.length ? (
               <>
                 <HitBox list={list} />
-                <MenuItems list={list} fav={fav} />
+                <MenuItems list={list} />
               </>
             ) : (
               <p className="sub" style={{ marginTop: 10 }}>
@@ -157,7 +157,7 @@ export function MenuView() {
           <div>{cards}</div>
         </Swap>
         <p className="foot">
-          숫자는 메뉴 이름으로 짐작한 알레르기 번호예요(식단표에 번호가 없어요). ♥는 별점 4점 이상 준 메뉴.
+          숫자는 메뉴 이름으로 짐작한 알레르기 번호예요(식단표에 번호가 없어요). ♡를 누르면 즐겨찾기돼요.
           <br />
           정확한 식단은{" "}
           <a href={SITE_URL} target="_blank" rel="noreferrer">

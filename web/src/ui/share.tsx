@@ -1,6 +1,6 @@
 "use client";
 
-// 메뉴 공유. 카카오·페이스북·X·인스타그램·복사·더보기. Android 앱은 네이티브 공유 시트를 연다.
+// 메뉴 공유. 카카오·페이스북·X·인스타그램(DM·스토리)·복사·더보기. Android 앱은 네이티브 공유 시트·인스타그램으로 바로 보낸다.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { MEAL_NAME, dormOf, mainDish, shortDate, type Dorm, type Meal, type Ymd } from "@/lib/menu";
@@ -143,32 +143,92 @@ async function shareKakao(meal: ShareMeal, toast: (m: string) => void) {
   }
 }
 
-async function shareInstagram(meal: ShareMeal, toast: (m: string) => void) {
-  const url = shareUrl(meal, "instagram");
+const INSTAGRAM = "com.instagram.android";
+
+/** 휴대폰(Android·iPhone·iPad)인지. iPadOS 사파리는 Mac 으로 나서 터치 수로 가른다. */
+function mobileOS(): boolean {
+  const ua = navigator.userAgent;
+  return /Android|iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
+/** 인스타그램 DM: 링크를 보내면 받는 쪽에 미리보기 카드(opengraph-image)가 뜬다. */
+async function shareInstagramDm(meal: ShareMeal, toast: (m: string) => void) {
+  const url = shareUrl(meal, "instagram_dm");
   const title = shareTitle(meal);
-  const og = `/s/${meal.dorm}/${meal.date}/${meal.meal}/opengraph-image`;
-  try {
-    const res = await fetch(og);
-    const file = new File([await res.blob()], "ssaltech.png", { type: "image/png" });
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title, text: meal.text, url });
-      track("share", { net: "instagram", target: mealKey(meal) });
+  const key = mealKey(meal);
+  const app = window.SsalTechNative;
+  if (typeof app?.shareTo === "function") {
+    if (app.shareTo(INSTAGRAM, title, title, url)) {
+      track("share", { net: "instagram_dm", target: key });
       return;
     }
-  } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") return;
-  }
-  if (nativeShare(title, meal.text, url)) {
-    track("share", { net: "native", target: mealKey(meal) });
+    toast("인스타그램 앱이 없어요. 다른 앱으로 보내 주세요.");
+    nativeShare(title, title, url);
     return;
   }
+  // 옛 Android 앱: 공유 시트에서 Instagram(채팅)을 고르게 한다.
+  if (nativeShare(title, title, url)) {
+    track("share", { net: "instagram_dm", target: key });
+    return;
+  }
+  // 휴대폰 브라우저: 웹에서는 인스타그램 DM 을 바로 열 수 없어 공유 시트로 넘긴다. 사진 없이 링크만 보내야 DM 에 링크가 남는다.
+  if (mobileOS() && navigator.share) {
+    try {
+      await navigator.share({ title, text: title, url });
+      track("share", { net: "instagram_dm", target: key });
+      return;
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
+    }
+  }
+  const copied = await copyText(url);
+  window.open("https://www.instagram.com/direct/inbox/", "_blank", "noopener,noreferrer");
+  toast(copied ? "링크를 복사했어요. 인스타그램 DM 창에 붙여 넣어 주세요." : "인스타그램 DM 창에 링크를 붙여 넣어 주세요.");
+  track("share", { net: "instagram_dm", target: key });
+}
+
+/** 인스타그램 스토리: 세로 이미지(/story)를 넘긴다. 앱이 이미지를 받아 스토리·피드·DM 중에 고르게 한다. */
+async function shareInstagramStory(meal: ShareMeal, toast: (m: string) => void) {
+  const url = shareUrl(meal, "instagram_story");
+  const title = shareTitle(meal);
+  const key = mealKey(meal);
+  const story = `/s/${meal.dorm}/${meal.date}/${meal.meal}/story`;
+  const app = window.SsalTechNative;
+  if (typeof app?.shareImageTo === "function") {
+    if (app.shareImageTo(INSTAGRAM, story)) {
+      void copyText(url).then((ok) => ok && toast("링크도 복사했어요. 스토리 링크 스티커에 붙여 넣어 주세요."));
+      track("share", { net: "instagram_story", target: key });
+      return;
+    }
+    toast("인스타그램 앱이 없어요.");
+    return;
+  }
+  // 이미지를 넘기는 기능이 없는 옛 Android 앱: WebView 에서는 내려받기도 안 되니 링크를 공유 시트로 보낸다.
+  if (nativeShare(title, meal.text, url)) {
+    track("share", { net: "native", target: key });
+    return;
+  }
+  if (mobileOS() && navigator.canShare) {
+    try {
+      const res = await fetch(story);
+      const file = new File([await res.blob()], "ssaltech-story.png", { type: "image/png" });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file] });
+        void copyText(url);
+        track("share", { net: "instagram_story", target: key });
+        return;
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
+    }
+  }
   const a = document.createElement("a");
-  a.href = `/s/${meal.dorm}/${meal.date}/${meal.meal}/story`;
+  a.href = story;
   a.download = "ssaltech-story.png";
   a.click();
   if (await copyText(url)) toast("스토리 이미지를 저장했어요. 인스타그램에 올리고 링크를 붙여 주세요.");
   else toast("링크를 복사하지 못했어요. 스토리 이미지는 저장했어요.");
-  track("share", { net: "instagram", target: mealKey(meal) });
+  track("share", { net: "instagram_story", target: key });
 }
 
 function facebookHref(url: string) {
@@ -180,7 +240,7 @@ function xHref(title: string, url: string) {
 }
 
 // 공유 대상마다 브랜드 색 원형 아이콘. 휴대폰 공유 시트처럼 보이게 한다.
-type Net = "kakao" | "facebook" | "x" | "instagram" | "copy" | "more";
+type Net = "kakao" | "facebook" | "x" | "instagram" | "dm" | "copy" | "more" | "back";
 const GLYPH: Record<Net, ReactNode> = {
   kakao: <path fill="#191919" d="M12 4.5c-4.7 0-8.5 3-8.5 6.6 0 2.3 1.5 4.4 3.9 5.5l-.8 3c-.1.3.2.5.4.3l3.5-2.3c.5.1 1 .1 1.5.1 4.7 0 8.5-3 8.5-6.6S16.7 4.5 12 4.5Z" />,
   facebook: <path fill="#fff" d="M13.4 20v-6.8h2.3l.4-2.7h-2.7V8.8c0-.8.3-1.3 1.4-1.3h1.4V5.1c-.3 0-1.1-.1-2.1-.1-2.1 0-3.5 1.3-3.5 3.6v2h-2.3v2.7h2.3V20h2.8Z" />,
@@ -190,6 +250,12 @@ const GLYPH: Record<Net, ReactNode> = {
       <rect x="5" y="5" width="14" height="14" rx="4.2" />
       <circle cx="12" cy="12" r="3.3" />
       <circle cx="16.3" cy="7.7" r=".6" fill="#fff" stroke="none" />
+    </g>
+  ),
+  dm: (
+    <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round">
+      <path d="M20 4.5 3.8 9.9l6.6 3 3 6.7L20 4.5Z" />
+      <path d="m10.4 12.9 4.4-4.3" strokeLinecap="round" />
     </g>
   ),
   copy: (
@@ -205,6 +271,7 @@ const GLYPH: Record<Net, ReactNode> = {
       <circle cx="17.5" cy="12" r="1.7" />
     </g>
   ),
+  back: <path fill="none" stroke="#17191E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M14.5 6.5 9 12l5.5 5.5" />,
 };
 
 function ShareIco({ net }: { net: Net }) {
@@ -227,6 +294,7 @@ export function SharePanel({
   variant?: "mobile" | "desktop";
 }) {
   const cls = variant === "mobile" ? "si press" : "si";
+  const [ig, setIg] = useState(false);
   const done = () => onDone?.();
   const title = shareTitle(meal);
   const fb = shareUrl(meal, "facebook");
@@ -237,12 +305,23 @@ export function SharePanel({
       <span className="sl">{label}</span>
     </>
   );
+  const list = variant === "mobile" ? "share-list" : "share-list desk";
+  // 인스타그램은 DM(링크)과 스토리(세로 이미지)가 따로라 한 번 더 고르게 한다.
+  if (ig) {
+    return (
+      <div className={list}>
+        <button type="button" className={cls} onClick={() => { void shareInstagramDm(meal, toast).then(done); }}>{body("dm", "DM 보내기")}</button>
+        <button type="button" className={cls} onClick={() => { void shareInstagramStory(meal, toast).then(done); }}>{body("instagram", "스토리")}</button>
+        <button type="button" className={cls} onClick={() => setIg(false)}>{body("back", "뒤로")}</button>
+      </div>
+    );
+  }
   return (
-    <div className={variant === "mobile" ? "share-list" : "share-list desk"}>
+    <div className={list}>
       <button type="button" className={cls} onClick={() => { void shareKakao(meal, toast).then(done); }}>{body("kakao", "카카오톡")}</button>
       <a className={cls} href={facebookHref(fb)} target="_blank" rel="noopener noreferrer" onClick={() => { track("share", { net: "facebook", target: mealKey(meal) }); done(); }}>{body("facebook", "페이스북")}</a>
       <a className={cls} href={xHref(title, x)} target="_blank" rel="noopener noreferrer" onClick={() => { track("share", { net: "x", target: mealKey(meal) }); done(); }}>{body("x", "X")}</a>
-      <button type="button" className={cls} onClick={() => { void shareInstagram(meal, toast).then(done); }}>{body("instagram", "인스타그램")}</button>
+      <button type="button" className={cls} onClick={() => setIg(true)}>{body("instagram", "인스타그램")}</button>
       <button type="button" className={cls} onClick={() => {
         void copyText(shareUrl(meal, "copy")).then((ok) => {
           toast(ok ? "링크를 복사했어요." : "링크를 복사하지 못했어요.");

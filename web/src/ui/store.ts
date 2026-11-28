@@ -84,7 +84,20 @@ export interface Alarm {
   dorm: Dorm;
   repeat: Repeat;
   on: boolean;
+  /** "fav"이면 즐겨찾기 알림: meal 대신 그날 세 끼에서 favs 메뉴를 찾아, 있을 때만 울린다. deliveredAlarms가 만든다. */
+  kind?: "fav";
+  favs?: string[];
 }
+
+/** 즐겨찾기 메뉴 알림 설정: offset일 뒤 메뉴에 즐겨찾기가 있으면 매일 time에 알린다. */
+export interface FavAlarm {
+  on: boolean;
+  offset: 0 | 1;
+  /** HH:MM */
+  time: string;
+}
+
+export const FAV_ALARM_DEFAULT: FavAlarm = { on: false, offset: 1, time: "21:00" };
 
 export interface AppState {
   dorm: Dorm;
@@ -92,6 +105,9 @@ export interface AppState {
   /** 날짜별 내가 매긴 별점 (메뉴 이름 → 1~5) */
   rates: Record<Ymd, Record<string, number>>;
   alarms: Alarm[];
+  /** 즐겨찾기한 메뉴 이름. 없던 시절 상태는 loadState가 별점 4점 이상으로 채운다. */
+  favs?: string[];
+  favAlarm?: FavAlarm;
 }
 
 const KEY = "ssaltech_v1";
@@ -99,7 +115,10 @@ const KEY = "ssaltech_v1";
 export function loadState(): AppState | null {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as AppState) : null;
+    if (!raw) return null;
+    const s = JSON.parse(raw) as AppState;
+    if (!s.favs) s.favs = [...latestRates(s)].filter(([, v]) => v >= 4).map(([k]) => k);
+    return s;
   } catch {
     return null;
   }
@@ -119,11 +138,28 @@ export function latestRates(s: AppState): Map<string, number> {
 
 export const ratingCount = (s: AppState) => Object.values(s.rates).reduce((a, r) => a + Object.keys(r).length, 0);
 
-/** 별점 4점 이상을 준 메뉴 */
-export function favorites(s: AppState): Set<string> {
-  const out = new Set<string>();
-  for (const [k, v] of latestRates(s)) if (v >= 4) out.add(k);
-  return out;
+/** 즐겨찾기한 메뉴 */
+export const favorites = (s: AppState): Set<string> => new Set(s.favs ?? []);
+
+/** 즐겨찾기를 켜거나 끈다 (update 안에서 부른다). */
+export function setFav(x: AppState, name: string, on: boolean) {
+  const f = favorites(x);
+  if (on) f.add(name);
+  else f.delete(name);
+  x.favs = [...f];
+}
+
+export const favAddedText = (s: AppState, name: string) =>
+  `${name} 즐겨찾기 ♥ · ${s.favAlarm?.on ? "나오는 날 알려 드려요" : "알림 탭에서 나오는 날 알림을 켤 수 있어요"}`;
+
+export const FAV_MAX = 50;
+
+/** 기기·허브에 넘길 알림 목록: 내가 만든 규칙 + 즐겨찾기 알림(켜져 있고 즐겨찾기가 있을 때). */
+export function deliveredAlarms(s: AppState): Alarm[] {
+  const f = s.favAlarm;
+  const favs = (s.favs ?? []).slice(0, FAV_MAX);
+  if (!f?.on || !favs.length) return s.alarms;
+  return [...s.alarms, { id: "fav", kind: "fav", favs, offset: f.offset, meal: "lunch", time: f.time, dorm: s.dorm, repeat: "all", on: true }];
 }
 
 // ---------- 식단 불러오기 ----------

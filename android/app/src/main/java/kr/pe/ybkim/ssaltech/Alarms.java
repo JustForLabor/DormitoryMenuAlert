@@ -173,16 +173,26 @@ final class Alarms {
     /**
      * 규칙 하나를 지금 울린다: (오늘+offset)의 그 메뉴를 받아 알림으로 띄우고 알림함에 남긴다.
      * 네트워크 스레드에서 부른다. 받기에 실패해도 알림은 띄운다(눌러서 앱에서 확인).
+     * 즐겨찾기 규칙(kind "fav")은 그날 즐겨찾기 메뉴가 있다고 서버가 답할 때만 띄운다.
      */
     static void fire(Context c, JSONObject a) {
         LocalDate date = LocalDate.now(KST).plusDays(a.optInt("offset", 0));
         String dorm = a.optString("dorm", "kb");
         String meal = a.optString("meal", "breakfast");
+        boolean fav = "fav".equals(a.optString("kind"));
+        JSONArray favs = a.optJSONArray("favs");
+        if (fav && (favs == null || favs.length() == 0)) return;
         String title = date.getMonthValue() + "/" + date.getDayOfMonth() + " " + mealName(meal);
         String body = "메뉴를 불러오지 못했어요. 눌러서 확인해 보세요.";
+        boolean show = !fav;
         HttpURLConnection conn = null;
         try {
-            String q = "dorm=" + URLEncoder.encode(dorm, "UTF-8") + "&date=" + date + "&meal=" + URLEncoder.encode(meal, "UTF-8");
+            StringBuilder q = new StringBuilder("dorm=").append(enc(dorm)).append("&date=").append(date);
+            if (fav) {
+                for (int i = 0; i < Math.min(favs.length(), 50); i++) q.append("&fav=").append(enc(favs.optString(i, "")));
+            } else {
+                q.append("&meal=").append(enc(meal));
+            }
             conn = (HttpURLConnection) new URL(BuildConfig.BASE_URL + "/api/notify?" + q).openConnection();
             conn.setConnectTimeout(TIMEOUT_MS);
             conn.setReadTimeout(TIMEOUT_MS);
@@ -191,6 +201,10 @@ final class Alarms {
                 JSONObject j = new JSONObject(readAll(conn.getInputStream()));
                 title = j.optString("title", title);
                 body = j.optString("body", body);
+                if (fav) {
+                    show = !j.optBoolean("skip", false);
+                    meal = j.optString("meal", meal);
+                }
             } else {
                 Log.w(TAG, "notify HTTP " + conn.getResponseCode());
             }
@@ -198,6 +212,10 @@ final class Alarms {
             Log.w(TAG, "notify fetch failed", e);
         } finally {
             if (conn != null) conn.disconnect();
+        }
+        if (!show) {
+            Log.i(TAG, "fav alarm: no favorite on " + date);
+            return;
         }
         String path = "/?dorm=" + enc(dorm) + "&date=" + date + "&meal=" + enc(meal) + "&utm_source=push&utm_medium=notification";
         notify(c, a.optString("id", "test"), title, body, path, date.toString());

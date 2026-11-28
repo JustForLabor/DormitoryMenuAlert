@@ -8,7 +8,8 @@ import { Ico, Mascot } from "../kit";
 import { APK_URL } from "../native";
 import { DORM_ICON } from "../sheets";
 import { WebPushCard } from "../WebPushCard";
-import type { Alarm, Repeat } from "../store";
+import { FavAlarmCard } from "../FavAlarmCard";
+import { deliveredAlarms, type Alarm, type Repeat } from "../store";
 import { PRESETS, newId, nextFire, ruleText } from "../views/AlarmView";
 import { Seg, dayLabel, st, useDesk } from "./shared";
 
@@ -22,7 +23,7 @@ const sameRule = (a: Pick<Alarm, "offset" | "meal" | "time" | "dorm">, b: Pick<A
   a.offset === b.offset && a.meal === b.meal && a.time === b.time && a.dorm === b.dorm;
 
 export function AlarmPage() {
-  const { s, today, toast } = useDesk();
+  const { s, update, today, toast } = useDesk();
   const on = s.alarms.filter((a) => a.on);
   // nextFire는 오늘 이미 지난 시각을 건너뛴다
   const next = on
@@ -65,8 +66,9 @@ export function AlarmPage() {
         </span>
       </section>
       <div className="st" style={st(2)}>
-        <WebPushCard alarms={s.alarms} toast={toast} variant="desktop" />
+        <WebPushCard alarms={deliveredAlarms(s)} toast={toast} variant="desktop" />
       </div>
+      <FavAlarmCard s={s} update={update} toast={toast} variant="desktop" />
       <div className="duo">
         <Rules />
         <NewRule />

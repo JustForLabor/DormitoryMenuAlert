@@ -3,10 +3,11 @@
 // v3.3 모바일 앱의 공용 블록. 마크업과 클래스 이름은 WasteLess 프로토타입(mobile.css, Figma 캡처)과 같다.
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { MEAL_NAME, WD, dayNum, kstToday, weekday, type Meal, type Ymd } from "@/lib/menu";
+import { trackRate } from "@/lib/track";
 import { useMobile, type Tab } from "./app";
 import { I, STAR_OFF, STAR_ON, type IconName } from "./icons";
 import { CountUp, haptic, motion, usePageVisible, useReducedMotion } from "./motion";
-import { AL, hits, type Dish } from "./store";
+import { AL, favAddedText, favorites, hits, setFav, type Dish } from "./store";
 import { BannersSheet, InboxSheet, SearchSheet } from "./sheets";
 
 const ATTR = /([\w:-]+)="([^"]*)"/g;
@@ -76,19 +77,26 @@ export function focusId(id: string) {
 
 // ---------- 메뉴 ----------
 
-/** 메뉴 목록. 알레르기 짐작 번호와 별점 4점 이상 메뉴(♥)를 함께 보여 준다. */
-export function MenuItems({ list, fav }: { list: readonly Dish[]; fav?: ReadonlySet<string> }) {
-  const { s } = useMobile();
+/** 메뉴 목록. 알레르기 짐작 번호와 즐겨찾기 버튼(♡/♥)을 함께 보여 준다. */
+export function MenuItems({ list }: { list: readonly Dish[] }) {
+  const { s, update, toast } = useMobile();
+  const fav = favorites(s);
+  const toggle = (name: string) => {
+    const on = !fav.has(name);
+    haptic("select");
+    update((x) => setFav(x, name, on));
+    toast(on ? favAddedText(s, name) : `${name} 즐겨찾기를 뺐어요`);
+  };
   return (
     <ul className="ml">
       {list.map(([name, nums], i) => (
         <li key={`${i}-${name}`} className={nums.some((n) => s.allergy.includes(n)) ? "hit" : ""}>
-          <span>
+          <span className="nm">
             {name}
-            {fav?.has(name) && (
-              <em className="fav" aria-label="좋아하는 메뉴">
-                <Icon k="heart" />
-              </em>
+            {!name.startsWith("선택식") && (
+              <button className={`fv press${fav.has(name) ? " on" : ""}`} aria-pressed={fav.has(name)} aria-label={`${name} 즐겨찾기`} onClick={() => toggle(name)}>
+                {fav.has(name) ? "♥" : "♡"}
+              </button>
             )}
           </span>
           <span className="n">
@@ -384,28 +392,30 @@ export function AlTile({ count }: { count: number }) {
   );
 }
 
-/** 메뉴별 별점. 이 기기에만 남고, 4점 이상은 "좋아하는 메뉴"로 식단에 ♥ 표시된다. */
-export function RateBlock({ date, names, title }: { date: Ymd; names: readonly string[]; title: string }) {
+/** 메뉴별 별점. 이 기기에 남고 허브에도 익명으로 모은다. 4점 이상이면 즐겨찾기(♥)에 넣는다. */
+export function RateBlock({ date, items, title }: { date: Ymd; items: readonly (readonly [string, Meal])[]; title: string }) {
   const { s, update, toast, confetti } = useMobile();
   const day = s.rates[date] ?? {};
+  const fav = favorites(s);
   // 누른 별을 다시 그려(key에 seq) 누를 때마다 pop 애니메이션이 다시 돈다.
   const [popped, setPopped] = useState<{ k: string; n: number; seq: number } | null>(null);
-  const rate = (k: string, n: number, e: MouseEvent) => {
+  const rate = (k: string, meal: Meal, n: number, e: MouseEvent) => {
     const first = !day[k];
     update((x) => {
       x.rates[date] = { ...(x.rates[date] ?? {}), [k]: n };
+      if (n >= 4) setFav(x, k, true);
     });
+    if (day[k] !== n) trackRate({ dorm: s.dorm, date, meal, dish: k, n });
     setPopped((p) => ({ k, n, seq: (p?.seq ?? 0) + 1 }));
     haptic("select");
-    if (n === 5 && day[k] !== 5) {
-      confetti(e.clientX, e.clientY);
-      toast(`${k}, 좋아하는 메뉴로 기억할게요`);
-    } else if (first && Object.keys(day).length === names.length - 1) toast("별점 고마워요! MY → 내 기록에서 모아 볼 수 있어요");
+    if (n === 5 && day[k] !== 5) confetti(e.clientX, e.clientY);
+    if (n >= 4 && !fav.has(k)) toast(favAddedText(s, k));
+    else if (first && Object.keys(day).length === items.length - 1) toast("별점 고마워요! MY → 내 기록에서 모아 볼 수 있어요");
   };
   return (
     <div className="rate" id="rate">
       <h4>{title}</h4>
-      {names.map((x) => (
+      {items.map(([x, meal]) => (
         <div className="rrow" key={x}>
           <span>{x}</span>
           <span className="stars">
@@ -413,7 +423,7 @@ export function RateBlock({ date, names, title }: { date: Ymd; names: readonly s
               const on = (day[x] ?? 0) >= n;
               const pop = popped?.k === x && popped.n === n;
               return (
-                <button key={pop ? `p${popped.seq}` : n} className={`${on ? "on" : ""}${pop ? " pop" : ""}`} onClick={(e) => rate(x, n, e)} aria-label={`${x} ${n}점`}>
+                <button key={pop ? `p${popped.seq}` : n} className={`${on ? "on" : ""}${pop ? " pop" : ""}`} onClick={(e) => rate(x, meal, n, e)} aria-label={`${x} ${n}점`}>
                   <Svg html={on ? STAR_ON : STAR_OFF} />
                 </button>
               );

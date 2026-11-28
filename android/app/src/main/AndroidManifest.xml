@@ -10,6 +10,11 @@
         android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:maxSdkVersion="32" />
 
+    <!-- 공유를 인스타그램으로 바로 보내려면 설치돼 있는지 알아야 한다 (Android 11+ 패키지 가시성) -->
+    <queries>
+        <package android:name="com.instagram.android" />
+    </queries>
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -50,5 +55,11 @@
         <receiver
             android:name=".InstallReceiver"
             android:exported="false" />
+
+        <provider
+            android:name=".ShareProvider"
+            android:authorities="kr.pe.ybkim.ssaltech.share"
+            android:exported="false"
+            android:grantUriPermissions="true" />
     </application>
 </manifest>

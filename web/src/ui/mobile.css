@@ -114,6 +114,10 @@
 .wlm .ml li .n i{font-style:normal;font-size:11px;font-weight:700;color:var(--ink3);background:#F3F4F7;border-radius:6px;padding:2px 6px}
 .wlm .ml li.hit{color:#D6204F}
 .wlm .ml li.hit .n i.h{background:#FF4F7B;color:#fff}
+.wlm .ml li .nm{display:flex;align-items:center;gap:2px;min-width:0}
+.wlm .ml .fv{flex:none;width:32px;height:32px;margin:-6px 0;border-radius:50%;font-size:18px;line-height:1;color:#C3C7CF;transition:color .2s,transform .25s}
+.wlm .ml .fv.on{color:#FF5C80}
+.wlm .lr .sq.favi{background:linear-gradient(135deg,#FF9DB3,#FF5C80);color:#fff;font-size:22px}
 .wlm .kc{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .wlm .kc span{font-size:12px;font-weight:650;color:var(--ink2);background:#F5F6F8;border-radius:99px;padding:4px 10px}
 .wlm .rate{margin-top:16px;padding-top:16px;border-top:1px dashed #E3E5EA}
@@ -512,5 +516,5 @@
 .wlm .sico-kakao{background:#FEE500}
 .wlm .sico-facebook{background:#1877F2}
 .wlm .sico-x{background:#000}
-.wlm .sico-instagram{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
-.wlm .sico-copy,.wlm .sico-more{background:#EEF0F3}
+.wlm .sico-instagram,.wlm .sico-dm{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
+.wlm .sico-copy,.wlm .sico-more,.wlm .sico-back{background:#EEF0F3}

@@ -118,8 +118,8 @@ export function HomeView() {
     },
     {
       bg: "linear-gradient(120deg,#FFF1C9,#FFE4B8)",
-      t: ["좋아하는 메뉴가", "나오는 날을 기억해요"],
-      d: "별점 4점 이상 준 메뉴에 ♥가 붙어요",
+      t: ["좋아하는 메뉴가", "나오면 알려 드려요"],
+      d: "식단표에서 ♡를 누르고 알림 탭에서 켜요",
       ill: "moa",
       size: 116,
       go: () => sheet(<ReportSheet key={Date.now()} />),
@@ -285,7 +285,7 @@ export function HomeView() {
               {tday.registered && (
                 <RateBlock
                   date={today}
-                  names={[...new Set(MEALS.map((m) => mainDish(tday.meals[m])).filter(Boolean))]}
+                  items={[...new Map(MEALS.map((m) => [mainDish(tday.meals[m]), m] as const).filter(([n]) => n)).entries()]}
                   title="오늘 메뉴 어땠어요?"
                 />
               )}

@@ -91,6 +91,8 @@
 
 /* ---- 검색 ---- */
 .wld .srch { position: relative; width: 340px; flex: none; }
+/* .st 등장 애니메이션(both)이 감싼 칸마다 쌓임 맥락을 만들어, 뒤에 오는 카드가 결과 목록을 덮는다. 검색을 감싼 칸을 위로 올린다. */
+.wld .st:has(.srch) { position: relative; z-index: 20; }
 .wld .srch .box { position: relative; display: flex; align-items: center; height: 48px; padding: 0 50px 0 18px; border-radius: 16px; background: #fff; box-shadow: var(--sh); transition: box-shadow .25s; cursor: text; }
 .wld .srch .box:focus-within { box-shadow: 0 0 0 4px rgba(255, 106, 69, .15), var(--sh); }
 .wld .srch input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; font: inherit; font-size: 15px; font-weight: 650; color: var(--ink); }
@@ -293,6 +295,10 @@
 .wld .dl li:last-child { border-bottom: 0; }
 .wld .dl .nm { flex: 1; min-width: 0; font-size: 15.5px; font-weight: 700; line-height: 1.4; }
 .wld .dl .nm em { font-style: normal; color: #ff5c80; }
+.wld .dl .fv { flex: none; width: 34px; height: 34px; border-radius: 50%; font-size: 19px; line-height: 1; color: var(--ink3); transition: transform .25s var(--spring), color .2s, background .2s; }
+.wld .dl .fv:hover { background: rgba(255, 92, 128, .1); color: #ff5c80; transform: scale(1.1); }
+.wld .dl .fv.on { color: #ff5c80; }
+.wld .favi { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 13px; background: linear-gradient(135deg, #ff9db3, #ff5c80); color: #fff; font-size: 21px; box-shadow: 0 6px 14px rgba(255, 92, 128, .3); }
 .wld .dl li.h .nm { color: var(--red); }
 .wld .al { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
 .wld .al i { min-width: 22px; height: 22px; padding: 0 6px; display: grid; place-items: center; border-radius: 11px; background: var(--soft); color: var(--ink3); font-size: 11px; font-weight: 800; font-style: normal; }
@@ -340,6 +346,7 @@
 .wld .presets { display: flex; flex-wrap: wrap; gap: 8px; }
 .wld .presets button { padding: 11px 15px; border-radius: 14px; background: #fff; box-shadow: var(--sh); font-size: 13.5px; font-weight: 750; transition: transform .25s var(--spring), color .2s; }
 .wld .presets button:hover { transform: translateY(-2px); color: var(--tomato); }
+.wld .presets button.on, .wld .presets button.on:hover { background: var(--grad); color: #fff; }
 .wld .sec.form, .wld .sec.install { padding: 24px 26px; border-radius: 28px; background: #fff; box-shadow: var(--sh); }
 .wld .form .fl { display: block; margin: 16px 0 8px; font-size: 13px; font-weight: 800; color: var(--ink2); }
 .wld .form .sh + .fl { margin-top: 0; }
@@ -521,5 +528,5 @@
 .wld .sico-kakao{background:#FEE500}
 .wld .sico-facebook{background:#1877F2}
 .wld .sico-x{background:#000}
-.wld .sico-instagram{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
-.wld .sico-copy,.wld .sico-more{background:#EEF0F3}
+.wld .sico-instagram,.wld .sico-dm{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
+.wld .sico-copy,.wld .sico-more,.wld .sico-back{background:#EEF0F3}

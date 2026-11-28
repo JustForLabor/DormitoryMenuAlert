@@ -1,11 +1,12 @@
 {
-  "versionCode": 3,
-  "versionName": "1.1.1",
+  "versionCode": 4,
+  "versionName": "1.2.0",
   "url": "https://dorm.ybkim.pe.kr/download/android?src=update",
-  "sha256": "4d6d7e22a32c3ebefa4aa2fb0ced43352ff4ef90c9c35e233f700a2fe37f3214",
-  "size": 131704,
+  "sha256": "a9bb0507e3f2644af01f51ec33c1b7176c2f8ee48b57c24167b6300e757ef85e",
+  "size": 134660,
   "notes": [
-    "알림 설명 문구를 다듬었어요."
+    "즐겨찾기한 메뉴가 나오는 날 알려 드려요.",
+    "인스타그램 DM·스토리로 바로 공유해요."
   ],
-  "published": "2026-11-27"
+  "published": "2026-11-28"
 }

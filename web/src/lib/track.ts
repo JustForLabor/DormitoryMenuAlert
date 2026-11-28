@@ -6,6 +6,11 @@ export function track(name: string, props?: Record<string, string | number>) {
   else (window.ybkq = window.ybkq || []).push(props ? [name, props] : [name]);
 }
 
+/** 별점 하나를 허브로 보낸다. 허브는 (방문자, 날짜, 메뉴)마다 마지막 점수만 남긴다. */
+export function trackRate(r: { dorm: string; date: string; meal: string; dish: string; n: number }) {
+  track("rate", { dorm: r.dorm, date: r.date, meal: r.meal, dish: r.dish, n: r.n });
+}
+
 declare global {
   interface Window {
     ybk?: { track: (name: string, props?: Record<string, string | number>) => void };

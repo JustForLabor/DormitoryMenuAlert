@@ -22,12 +22,18 @@ interface Bridge {
   test(json: string): void;
   /** Android 공유 시트. 아직 없는 빌드도 있어 호출 전에 함수인지 본다. */
   share?(title: string, text: string, url: string): void;
+  /** 글과 링크를 한 앱(pkg)으로 바로 보낸다. 그 앱이 없으면 false. 1.2.0 부터. */
+  shareTo?(pkg: string, title: string, text: string, url: string): boolean;
+  /** 이 사이트 이미지(path, /s/… 만)를 받아 한 앱(pkg)으로 보낸다. 그 앱이 없으면 false. 1.2.0 부터. */
+  shareImageTo?(pkg: string, path: string): boolean;
   /** 앱 업데이트 상태 JSON(AppUpdate). 1.1.0 이전 빌드에는 없다. */
   update?(): string;
   /** version.json을 지금 다시 받아 본다. 결과는 "ssaltech-native" 이벤트로 온다. */
   checkUpdate?(): void;
   /** 새 APK를 받아 설치 창까지 띄운다. */
   startUpdate?(): void;
+  /** 즐겨찾기 알림(kind "fav" 규칙)을 이해하면 있다. 1.2.0 부터. */
+  favAlarms?(): boolean;
 }
 
 declare global {
@@ -40,9 +46,18 @@ export const NATIVE_EVENT = "ssaltech-native";
 
 export const bridge = (): Bridge | undefined => (typeof window === "undefined" ? undefined : window.SsalTechNative);
 
+/** 알림 규칙을 앱에 넘긴다. 즐겨찾기 규칙은 이해하는 앱에만 넘긴다(예전 앱은 점심 메뉴 알림으로 울린다). */
 export function pushAlarms(alarms: readonly Alarm[]) {
-  bridge()?.setAlarms(JSON.stringify(alarms));
+  const b = bridge();
+  if (!b) return;
+  b.setAlarms(JSON.stringify(typeof b.favAlarms === "function" ? alarms : alarms.filter((a) => a.kind !== "fav")));
 }
+
+/** 이 앱(또는 웹 푸시)이 즐겨찾기 알림을 보낼 수 있는지. 예전 Android 앱이면 false. */
+export const favAlarmsSupported = () => {
+  const b = bridge();
+  return !b || typeof b.favAlarms === "function";
+};
 
 export interface Pushed {
   title: string;
