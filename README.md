@@ -25,7 +25,7 @@ dorm-menu : 서울과기대 생활관 식단 알리미
     dorm-menu                    오늘 식단
     dorm-menu week               이번 주 (월~일)
     dorm-menu month              이번 달 (올라온 주까지)
-    dorm-menu next               다음 끼니
+    dorm-menu next               다음 밥
     dorm-menu --dorm surim week  학사 지정
     dorm-menu -D 2026-11-25      다른 날짜 기준으로 보기
     dorm-menu -r today           저장된 식단 무시하고 새로 받기
@@ -72,7 +72,7 @@ dorm-menu : 서울과기대 생활관 식단 알리미
 
   알림 규칙
     "<오늘|내일> <아침|점심|저녁> <HH:MM>" 한 줄이 규칙 하나다.
-    매일 그 시각에 (그날 + 오늘/내일)의 그 끼니 메뉴를 알린다.
+    매일 그 시각에 (그날 + 오늘/내일)의 그 메뉴를 알린다.
       alarm add 내일 아침 21:00 surim   매일 밤 9시에 수림 내일 아침 메뉴
       alarm add 오늘 점심 10:30 kb      매일 10시 30분에 KB 오늘 점심 메뉴
     학사(kb|sunglim|surim)는 규칙마다 반드시 적는다.
@@ -107,7 +107,7 @@ dorm-menu : 서울과기대 생활관 식단 알리미
     글씨로 뜬다. 열린 터미널이 없으면 ~/.dorm_menu/daemon.log 에
     남긴다. GUI가 있는 Linux면 notify-send도 함께 띄운다.
 
-  next 명령은 "아직 끝나지 않은 가장 가까운 끼니"를 고른다.
+  next 명령은 "아직 끝나지 않은 가장 가까운 밥"을 고른다.
   끝나는 시각은 생활관 식당 이용시간(학기) 기준이다.
       평일  09:00 / 14:00 / 18:50
       주말  09:00 / 13:30 / 18:30
@@ -200,3 +200,69 @@ dorm-menu : 서울과기대 생활관 식단 알리미
   - 출력은 UTF-8이다. PuTTY 설정에서
     Window > Translation > Remote character set 이 UTF-8이어야
     한글이 보인다.
+
+
+10. 웹 앱과 Android 앱 (SsalTech)
+---------------------------------
+
+  같은 기능을 휴대폰에서 쓰도록 만든 모바일 웹 앱과, 그 웹 앱을
+  띄우고 정한 시각에 알림을 울리는 Android 앱이다. C 코드(Source/)는
+  건드리지 않았고 사이트 요청·파싱 규칙(8절)을 TypeScript로 옮겼다.
+
+    https://dorm.ybkim.pe.kr       웹 앱 (설치형 웹 앱, 아이폰은 홈 화면에 추가)
+    https://dorm.ybkim.pe.kr/download/android   Android 앱 (내려받기 수를 센 뒤 ssaltech.apk 로)
+
+  web/  (Next.js, Vercel 서울 리전 icn1)
+    src/lib/site.ts    생활관 사이트에서 주 단위로 받기 (항상 월요일)
+    src/lib/menu.ts    <table class="chang"> 파싱, 날짜 계산
+    src/app/api/menu   GET ?dorm=kb&date=YYYY-MM-DD → 그 주 7일
+                       다 올라온 주는 CDN에 12시간 캐시
+    src/app/api/notify GET ?dorm&date&meal → 알림 제목·본문 한 끼
+    src/app/s/[dorm]/[date]/[meal]
+                       공유 링크. 메뉴마다 제목·OG 이미지를 만들고 사람은 앱으로 보낸다.
+                       story 는 인스타그램 스토리용 1080×1920 이미지.
+    src/app/opengraph-image.tsx, robots.ts, sitemap.ts
+                       검색·공유 미리보기. 첫 화면은 세 식당 오늘 식단을 서버에서 그린다.
+    src/ui/share.tsx   카카오톡(JS SDK, NEXT_PUBLIC_KAKAO_JS_KEY)·페이스북·X·인스타그램·
+                       링크 복사·더보기. Android 앱 안에서는 앱 공유 시트.
+    src/ui/webpush.ts  이 브라우저로 알림 받기. 구독과 규칙을 hub 서버에 올린다.
+    public/sw.js       앱 셸 캐시, 푸시 알림 표시·누르면 그 메뉴로 이동, 새 버전 토스트
+    src/ui/            휴대폰 화면 (오늘·식단·알림·알레르기·MY)
+    src/ui/desktop/    데스크톱 화면: 휴대폰 화면과 같은 탭(오늘·식단표·알림·알레르기·MY)을
+                       왼쪽 메뉴로 옮겼다. 식단표는 주간·월간 표 + 고른 메뉴 상세·별점,
+                       오늘은 다음 밥 인사말·세 끼·세 식당 비교. 움직임은
+                       desktop.css 의 wld* 키프레임이며 동작 줄이기 설정이면 끈다.
+                       폭 1024px 이상이면 데스크톱 화면, ?ui=mobile 또는
+                       ?ui=desktop 으로 고를 수 있다. Android 앱 안은 늘 휴대폰 화면.
+    알레르기는 사이트에 번호가 없어 메뉴 이름으로 짐작한다.
+    설정·별점·알림 규칙은 그 기기(localStorage)에만 저장한다.
+
+      cd web && npm install && npm run dev
+
+  android/  (Java, 외부 라이브러리 없음, minSdk 26)
+    MainActivity   WebView로 웹 앱을 띄운다
+    Bridge         웹 앱의 window.SsalTechNative (web/src/ui/native.ts)
+    Alarms         규칙마다 다음 시각을 AlarmManager 정확한 알람으로
+                   예약. 울릴 때 /api/notify 에서 메뉴를 받아 알림을
+                   띄우고 다음 시각을 다시 예약한다.
+    BootReceiver   재부팅·업데이트·시계 변경 뒤 다시 예약
+    Updater        켤 때(6시간마다) web/public/app/version.json 을 보고 새 버전이
+                   있으면 앱 안에서 받아 sha256 을 맞춘 뒤 설치 창을 띄운다.
+                   MY 탭에서 직접 확인·설치할 수 있다.
+    알림은 중요도 높은 채널(menu-heads)이라 다른 앱처럼 화면 위에 뜬다.
+
+      cd android && ./gradlew assembleRelease
+      ./gradlew assembleDebug -PbaseUrl=http://10.0.2.2:3000
+                                 에뮬레이터에서 로컬 웹 서버로 시험
+
+    서명 키는 저장소 밖에 둔다. android/keystore.properties 에
+    storeFile, storePassword, keyAlias, keyPassword 를 적으면
+    release 빌드에 쓰인다. 만든 APK는 web/public/ssaltech.apk 로
+    복사하고 web/public/app/version.json 의 versionCode·sha256·size 를
+    맞춘 뒤 웹과 함께 배포한다.
+
+  알림은 두 길로 울린다. Android 앱은 AlarmManager 로 기기에서, 웹은
+  hub 서버(ybkim-hub, hub.ybkim.pe.kr)가 규칙 시각에 웹 푸시를 보낸다.
+  아이폰 웹 푸시는 iOS 16.4 이상에서 홈 화면에 추가한 뒤에만 된다.
+  hub 는 방문·체류 시간·유입 경로·공유·APK 내려받기도 모으고,
+  admin.ybkim.pe.kr (Cloudflare Access 로 막음) 에서 볼 수 있다.

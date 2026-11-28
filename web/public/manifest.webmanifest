@@ -1,0 +1,31 @@
+{
+  "name": "SsalTech · 서울과기대 생활관 식단",
+  "short_name": "SsalTech",
+  "description": "서울과학기술대학교 생활관(KB·성림·수림학사) 식단을 주간·월간으로 보고, 알레르기를 짚고, 정한 시각에 메뉴 알림을 받는 앱.",
+  "lang": "ko",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#F3F4F7",
+  "theme_color": "#F3F4F7",
+  "categories": ["food", "lifestyle"],
+  "icons": [
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/assets/badge-96.png", "sizes": "96x96", "type": "image/png", "purpose": "monochrome" }
+  ],
+  "shortcuts": [
+    { "name": "오늘 식단", "short_name": "오늘", "url": "/?tab=home", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] },
+    { "name": "식단표", "short_name": "식단", "url": "/?tab=menu", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] },
+    { "name": "알림", "short_name": "알림", "url": "/?tab=alarm", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] }
+  ],
+  "screenshots": [
+    { "src": "/assets/screens/wide-1280x800.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "오늘 식단" },
+    { "src": "/assets/screens/narrow-390x844.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "오늘 식단" }
+  ]
+}

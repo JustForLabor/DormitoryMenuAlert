@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SsalTech</string>
+    <string name="channel_menu">식단 알림</string>
+    <string name="channel_menu_desc">정한 시각에 메뉴를 알려 줘요</string>
+    <string name="channel_updates">앱 업데이트</string>
+    <string name="channel_updates_desc">새 버전을 받는 동안 진행을 보여 줘요</string>
+    <string name="update_title">새 버전 %1$s</string>
+    <string name="update_now">업데이트</string>
+    <string name="update_later">나중에</string>
+    <string name="update_downloading">업데이트 받는 중</string>
+    <string name="update_ready">설치를 확인해 주세요</string>
+    <string name="action_open_menu">식단 보기</string>
+    <string name="notif_group">식단 알림</string>
+    <string name="offline">인터넷에 연결되지 않았어요. 연결되면 다시 불러올게요.</string>
+    <string name="share_image_failed">공유할 이미지를 받지 못했어요. 잠시 뒤에 다시 해 주세요.</string>
+</resources>

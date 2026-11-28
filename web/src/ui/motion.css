@@ -1,0 +1,153 @@
+/* WasteLess v3.3 mobile app — motion layer (Material motion: fade-through, shared axis X/Z).
+   View-transition classes are produced by motion.tsx (`<type>-in` / `<type>-out`). */
+
+/* Keep the app chrome (tab bar, sheet, toast) live; only named screens/content animate. */
+:root:has(.wlm) { view-transition-name: none; }
+
+/* Browsers with view transitions use them instead of the CSS remount animation. */
+@supports (view-transition-class: a) {
+  .wlm .scr.on { animation: none; }
+}
+
+@keyframes wl-fade-in { from { opacity: 0; } }
+@keyframes wl-fade-out { to { opacity: 0; } }
+@keyframes wl-scale-in { from { transform: scale(.92); } }
+@keyframes wl-zoom-in { from { transform: scale(.86); } }
+@keyframes wl-zoom-out { to { transform: scale(1.08); } }
+@keyframes wl-x-from-right { from { transform: translateX(30px); } }
+@keyframes wl-x-to-left { to { transform: translateX(-30px); } }
+@keyframes wl-x-from-left { from { transform: translateX(-30px); } }
+@keyframes wl-x-to-right { to { transform: translateX(30px); } }
+@keyframes wl-y-from-below { from { transform: translateY(12px); } }
+
+/* Snapshots are drawn above the live page and ignore the scroller's clipping, so moving content
+   could cover the tab bar and top bar or slide past the phone frame.
+   · The tab bar and toast are captured as their own groups stacked above every screen/content group
+     (the tab bar only while shown and no sheet is open: the dim and sheet stay live underneath the
+     snapshots). The tab bar's slide is turned off during transitions so it is never captured
+     half-way below the screen; it fades in or out with the screens instead.
+   · Inside-screen changes (`wl-inner`, see motion.tsx) capture the screen as a group whose children
+     clip to it (nested view-transition groups); the sticky top bar becomes an opaque child painted
+     above the moving content.
+   · Screen changes close any open sheet first; the live dim and sheet are hidden so they do not show
+     through the cross-fading screens while they slide away. */
+.wlm:not(:has(.sheet.on)) .tabs:not(.off) { view-transition-name: wl-tabs; }
+:root:active-view-transition .wlm .tabs { transition: none; }
+.wlm .toast.on { view-transition-name: wl-toast; }
+::view-transition-group(wl-tabs) { z-index: 2; }
+::view-transition-group(wl-toast) { z-index: 3; }
+:root:active-view-transition-type(wl-inner) .wlm .scr.on { view-transition-name: wl-scr; }
+:root:active-view-transition-type(wl-inner) .wlm .scr.on * { view-transition-group: nearest; }
+::view-transition-group-children(wl-scr) { overflow: clip; }
+:root:active-view-transition-type(wl-inner) .wlm .scr.on .tbar { view-transition-name: wl-tbar; background: #F3F4F7; }
+:root:active-view-transition-type(wl-inner) .wlm .scr.on .tbar.w { background: #fff; }
+::view-transition-group(wl-tbar) { z-index: 1; }
+:root:active-view-transition-type(wl-tab, wl-push, wl-pop, wl-enter-app, wl-org):not(:active-view-transition-type(wl-inner)) .wlm :is(.dim, .sheet) { visibility: hidden; }
+
+/* Clip moving snapshots to the phone frame on desktop. */
+@media (min-width: 760px) {
+  ::view-transition-group(.wl-tab-in), ::view-transition-group(.wl-tab-out),
+  ::view-transition-group(.wl-push-in), ::view-transition-group(.wl-push-out),
+  ::view-transition-group(.wl-pop-in), ::view-transition-group(.wl-pop-out),
+  ::view-transition-group(.wl-enter-app-in), ::view-transition-group(.wl-enter-app-out),
+  ::view-transition-group(.wl-org-in), ::view-transition-group(.wl-org-out) { overflow: clip; }
+}
+
+/* Bottom tabs: fade through. */
+::view-transition-old(.wl-tab-out) { animation: 90ms cubic-bezier(.4,0,1,1) both wl-fade-out; }
+::view-transition-new(.wl-tab-in) { animation: 210ms cubic-bezier(0,0,.2,1) 90ms both wl-fade-in, 210ms cubic-bezier(0,0,.2,1) 90ms both wl-scale-in; }
+
+/* Deeper screen / next step: shared axis X forward. */
+::view-transition-old(.wl-push-out) { animation: 90ms cubic-bezier(.4,0,1,1) both wl-fade-out, 300ms cubic-bezier(.4,0,.2,1) both wl-x-to-left; }
+::view-transition-new(.wl-push-in) { animation: 210ms cubic-bezier(0,0,.2,1) 90ms both wl-fade-in, 300ms cubic-bezier(.4,0,.2,1) both wl-x-from-right; }
+
+/* Back: shared axis X backward. */
+::view-transition-old(.wl-pop-out) { animation: 90ms cubic-bezier(.4,0,1,1) both wl-fade-out, 300ms cubic-bezier(.4,0,.2,1) both wl-x-to-right; }
+::view-transition-new(.wl-pop-in) { animation: 210ms cubic-bezier(0,0,.2,1) 90ms both wl-fade-in, 300ms cubic-bezier(.4,0,.2,1) both wl-x-from-left; }
+
+/* Entering the app (login / onboarding → home): shared axis Z. */
+::view-transition-old(.wl-enter-app-out) { animation: 120ms cubic-bezier(.4,0,1,1) both wl-fade-out, 320ms cubic-bezier(.4,0,.2,1) both wl-zoom-out; }
+::view-transition-new(.wl-enter-app-in) { animation: 240ms cubic-bezier(0,0,.2,1) 100ms both wl-fade-in, 360ms cubic-bezier(.2,.8,.2,1) both wl-zoom-in; }
+
+/* Org switch: slower fade through with zoom so the whole home visibly changes. */
+::view-transition-old(.wl-org-out) { animation: 160ms cubic-bezier(.4,0,1,1) both wl-fade-out, 260ms ease-in both wl-zoom-out; }
+::view-transition-new(.wl-org-in) { animation: 280ms cubic-bezier(0,0,.2,1) 140ms both wl-fade-in, 420ms cubic-bezier(.2,.8,.2,1) 60ms both wl-zoom-in; }
+
+/* In-screen content swaps (day, cafeteria, step, view mode). */
+::view-transition-old(.wl-swap-next-out) { animation: 80ms linear both wl-fade-out, 240ms cubic-bezier(.4,0,.2,1) both wl-x-to-left; }
+::view-transition-new(.wl-swap-next-in) { animation: 180ms cubic-bezier(0,0,.2,1) 70ms both wl-fade-in, 260ms cubic-bezier(.2,.8,.2,1) both wl-x-from-right; }
+::view-transition-old(.wl-swap-prev-out) { animation: 80ms linear both wl-fade-out, 240ms cubic-bezier(.4,0,.2,1) both wl-x-to-right; }
+::view-transition-new(.wl-swap-prev-in) { animation: 180ms cubic-bezier(0,0,.2,1) 70ms both wl-fade-in, 260ms cubic-bezier(.2,.8,.2,1) both wl-x-from-left; }
+::view-transition-old(.wl-swap-fade-out) { animation: 90ms linear both wl-fade-out; }
+::view-transition-new(.wl-swap-fade-in) { animation: 200ms cubic-bezier(0,0,.2,1) 60ms both wl-fade-in, 260ms cubic-bezier(.2,.8,.2,1) both wl-y-from-below; }
+
+/* Shared elements (Morph): position/size morph plus pop for insertions and removals. */
+::view-transition-group(.wl-morph) { animation-duration: 320ms; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
+::view-transition-new(.wl-pop-in) { animation: 220ms cubic-bezier(.2,.8,.2,1) both wl-fade-in, 320ms cubic-bezier(.3,1.5,.5,1) both wl-scale-in; }
+::view-transition-old(.wl-pop-out) { animation: 160ms ease-in both wl-fade-out, 160ms ease-in both wl-zoom-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* ---------- chrome micro-interactions ---------- */
+
+/* Tab bar: icon pop on activation, press feedback. */
+@keyframes wl-tab-pop { 0% { transform: scale(.82); } 55% { transform: scale(1.12); } 100% { transform: none; } }
+.wlm .tabs > button.on > i { animation: wl-tab-pop .38s cubic-bezier(.3,1.5,.5,1); }
+.wlm .tabs > button { transition: color .2s; }
+.wlm .tabs > button:active > i { transform: scale(.9); transition: transform .1s; }
+.wlm .tabs .ctr:active .fab { transform: scale(.92); }
+.wlm .tabs .ctr.on .fab { box-shadow: 0 0 0 5px #fff, 0 12px 26px rgba(255,79,123,.5); }
+
+/* Bottom sheet: drag-to-dismiss follows the finger; spring settles back. */
+.wlm .sheet { transition: transform .42s cubic-bezier(.2,.9,.25,1); will-change: transform; overscroll-behavior: contain; touch-action: pan-y; }
+.wlm .sheet.dragging { transition: none; }
+.wlm .sheet .gr { cursor: grab; touch-action: none; }
+.wlm .sheet:focus { outline: none; }
+.wlm .dim { transition: opacity .32s; }
+.wlm .dim.dragging { transition: none; }
+
+/* Toast: re-pops when the message changes. */
+@keyframes wl-toast-pop { 0% { transform: translate(-50%, 8px) scale(.96); } 100% { transform: translate(-50%, 0) scale(1); } }
+.wlm .toast.on.again { animation: wl-toast-pop .28s cubic-bezier(.2,.8,.2,1); }
+
+/* Splash (cold start once per session). */
+.wlm .splash { position: absolute; inset: 0; z-index: 90; display: grid; place-items: center; align-content: center; gap: 14px;
+  background: radial-gradient(600px 380px at 30% 0%, #FFEDE0 0, transparent 60%), #F3F4F7; transition: opacity .35s ease, visibility .35s; }
+.wlm .splash.out { opacity: 0; visibility: hidden; }
+.wlm .splash .mkb { width: 88px; height: 88px; border-radius: 24px; overflow: hidden; box-shadow: 0 14px 30px rgba(255,90,80,.35); animation: wl-splash-in .6s cubic-bezier(.3,1.5,.5,1) both; }
+.wlm .splash .wm { font-size: 26px; font-weight: 850; letter-spacing: -.03em; animation: wl-fade-in .4s .18s both; }
+.wlm .splash .wm em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@keyframes wl-splash-in { from { opacity: 0; transform: scale(.6) translateY(12px); } }
+
+/* Pull to refresh. */
+.wlm .ptr { position: relative; }
+.wlm .ptr-ind { position: absolute; left: 50%; top: 0; width: 46px; height: 46px; margin-left: -23px; border-radius: 50%; background: #fff;
+  box-shadow: var(--sh); display: grid; place-items: center; z-index: 5; opacity: 0; transform: translateY(calc(var(--pull) - 52px)) scale(.6);
+  transition: opacity .2s, transform .3s cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+.wlm .ptr.pulling .ptr-ind { opacity: 1; transform: translateY(calc(var(--pull) - 40px)) scale(1); transition: opacity .2s; }
+.wlm .ptr.busy .ptr-ind img { animation: wl-spin .8s linear infinite; }
+.wlm .ptr-body { transform: translateY(var(--pull)); transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+.wlm .ptr.pulling:not(.busy) .ptr-body { transition: none; }
+@keyframes wl-spin { to { transform: rotate(360deg); } }
+
+/* Sticky top bars (.tbar) get a hairline + shadow once content scrolls under them. */
+.wlm .tbar { transition: box-shadow .2s; }
+.wlm .scr.scrolled .tbar { box-shadow: 0 1px 0 var(--line), 0 6px 18px rgba(23,25,30,.05); }
+
+/* Reveal on scroll: animations in a [data-reveal] block wait until the shell marks it .in (in view). */
+.wlm [data-reveal]:not(.in), .wlm [data-reveal]:not(.in) * { animation-play-state: paused !important; }
+
+/* Generic live value transitions used by screens. */
+.wlm .tween-w { transition: width .55s cubic-bezier(.2,.8,.2,1); }
+.wlm .flash { animation: hlF 1.1s ease; }
+
+/* Hover affordance on pointer devices only. */
+@media (hover: hover) and (pointer: fine) {
+  .wlm .press:hover { filter: brightness(.985); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wlm .sheet, .wlm .dim, .wlm .ptr-body, .wlm .ptr-ind, .wlm .splash, .wlm .tween-w { transition: none !important; }
+}

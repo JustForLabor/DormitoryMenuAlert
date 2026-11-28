@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 전경은 웹 앱의 maskable 아이콘을 90dp로 줄여 108dp 캔버스 가운데 둔 것: 보이는 72dp가 maskable 안전 영역(80%)과 같다. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/brand" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>

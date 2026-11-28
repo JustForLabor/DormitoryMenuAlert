@@ -1,0 +1,243 @@
+/* Login + onboarding micro-interactions (motion only; resting states stay as mobile.css draws them).
+   Press feedback uses the individual `scale` property because `.st` entrances keep `transform` filled. */
+
+/* ---------- login ---------- */
+
+/* Mascot rises after the logo, then the speech bubble pops out of its mouth side. */
+@keyframes ao-rise { from { opacity: 0; transform: translateY(16px) scale(.9); } }
+@keyframes ao-bub { 0% { opacity: 0; transform: translateY(6px) scale(.6); } 70% { opacity: 1; transform: scale(1.04); } 100% { transform: none; } }
+.wlm .lgw .lgm .ill { animation: ao-rise .55s cubic-bezier(.2,.8,.2,1) .12s both; }
+.wlm .lgw .lgm .bub { transform-origin: 0 100%; animation: ao-bub .5s cubic-bezier(.3,1.4,.5,1) .5s both; }
+.wlm .lgw .lgf { animation: wl-fade-in .5s ease .45s both; }
+
+.wlm .lgw .lbtn { transition: transform .15s, filter .15s; }
+.wlm .lgw .lbtn:active { filter: brightness(.97); }
+.wlm .lgw .lgo button { transition: scale .14s cubic-bezier(.2,.8,.2,1), background-color .2s; }
+.wlm .lgw .lgo button:active { scale: .94; background-color: #ECEDF1; }
+
+/* ---------- onboarding ---------- */
+
+/* Selection cards: base `.press:active` (mobile.css) supplies the press scale; keep the springy state transition. */
+.wlm .ob .st.press { transition: all .25s cubic-bezier(.3,1.4,.5,1); }
+.wlm .ob .sch { transition: all .2s, scale .14s ease; }
+.wlm .ob .sch:active { scale: .98; }
+.wlm .ob .chip:active { scale: .94; }
+.wlm .ob .grd button:active { scale: .92; }
+
+/* Check mark pops in when a card becomes selected. */
+@keyframes ao-ck { 0% { scale: 0; opacity: 0; } 60% { scale: 1.25; opacity: 1; } 100% { scale: 1; } }
+.wlm .ob .on > .ck svg { animation: ao-ck .34s cubic-bezier(.3,1.5,.5,1) both; }
+
+/* Grade / slot picker and empty search state ease in when they appear. */
+@keyframes ao-in { from { opacity: 0; transform: translateY(8px); } }
+.wlm .ob .ao-in { animation: ao-in .32s cubic-bezier(.2,.8,.2,1) both; }
+.wlm .ob .ao-empty { animation: wl-fade-in .28s ease both; }
+
+/* CTA enable/disable: cross-fade a grey cover instead of snapping the gradient. */
+.wlm .ob .cta { position: relative; isolation: isolate; transition: color .25s, box-shadow .25s, transform .14s ease, translate .14s; }
+.wlm .ob .cta::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: #E4E6EB; opacity: 0; transition: opacity .25s ease; }
+/* Disabled: the cover alone paints the grey (no gradient under it, so no fringe at the rounded edge);
+   enabling fades the cover out over the gradient, disabling snaps (rare: only after changing an earlier answer). */
+.wlm .ob .cta.dis { background: transparent; }
+.wlm .ob .cta.dis::before { opacity: 1; transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wlm .lgw .lgm .ill, .wlm .lgw .lgm .bub, .wlm .lgw .lgf, .wlm .ob .on > .ck svg, .wlm .ob .ao-in, .wlm .ob .ao-empty { animation: none !important; }
+  .wlm .lgw .lbtn, .wlm .lgw .lgo button, .wlm .ob .st.press, .wlm .ob .sch, .wlm .ob .cta, .wlm .ob .cta::before { transition: none !important; }
+}
+/* MY tab motion (MyProfileView). Resting states come from mobile.css; this only adds the in-between. */
+
+/* Profile avatar: mascot pops in after the card rises. */
+.wlm .prof .av.avin { animation: myAvIn .62s cubic-bezier(.3,1.5,.5,1) .12s both; }
+@keyframes myAvIn {
+  from { opacity: 0; transform: scale(.6) rotate(-14deg); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Notification switch: track colour eases, knob springs and stretches while pressed. */
+.wlm .tg { transition: background-color .28s cubic-bezier(.2,.8,.2,1); -webkit-tap-highlight-color: transparent; }
+.wlm .tg:after { transform-origin: 0 50%; transition: transform .38s cubic-bezier(.3,1.5,.5,1); }
+.wlm .tg.on:after { transform-origin: 100% 50%; }
+.wlm .tg:active:after { transform: scaleX(1.18); }
+.wlm .tg.on:active:after { transform: translateX(20px) scaleX(1.18); }
+
+/* Data sheet rows rise in one after another once the sheet starts sliding up. */
+.wlm .sheet .lr.dsr { animation-delay: calc(110ms + var(--i, 0) * 55ms); }
+
+/* Logout confirm sheet. */
+.wlm .my-lo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 22px; }
+.wlm .my-lo .cta { margin: 0; }
+.wlm .my-lo .my-cn { height: 56px; border-radius: 18px; background: #F1F2F5; color: var(--ink); font-size: 17px; font-weight: 800; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wlm .prof .av.avin, .wlm .sheet .lr.dsr { animation: none !important; }
+  .wlm .tg, .wlm .tg:after { transition: none !important; }
+  .wlm .tg:active:after { transform: none; }
+  .wlm .tg.on:active:after { transform: translateX(20px); }
+}
+/* 식단표 (school, MealPlanView) — in-screen choreography. Resting state is unchanged; these only add the entrance. */
+
+/* Month calendar: today's circle and allergy dots pop in, staggered, once the calendar has faded in. */
+.wlm .mp-cal .cg button.td b { animation: wl-mp-dot-in .42s cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(160ms + var(--i, 0) * 35ms); }
+.wlm .mp-cal .cg button.al::after { animation: wl-mp-dot-in .36s cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(200ms + var(--i, 0) * 35ms); }
+@keyframes wl-mp-dot-in { from { opacity: 0; transform: scale(.3); } }
+
+/* Menu-change notice (e.g. 마파두부 → 불고기) slides in once when its card appears. */
+.wlm .mcard .mp-chg { animation: wl-mp-chg-in .45s cubic-bezier(.2,.8,.2,1) .18s both; }
+.wlm .mcard .mp-chg .pill { animation: wl-mp-pill-pop .4s cubic-bezier(.3,1.5,.5,1) .38s both; }
+@keyframes wl-mp-chg-in { from { opacity: 0; transform: translateX(-16px); } }
+@keyframes wl-mp-pill-pop { from { transform: scale(.6); } }
+
+/* Segmented 주간/월간: indicator slide is in mobile.css; add press feedback on the pill. */
+.wlm .segp i { transition: transform .35s cubic-bezier(.3,1.3,.5,1), scale .15s ease; }
+.wlm .segp:has(button:active) i { scale: .96; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wlm .mp-cal .cg button.td b, .wlm .mp-cal .cg button.al::after, .wlm .mcard .mp-chg, .wlm .mcard .mp-chg .pill { animation: none; }
+  .wlm .segp i { transition: none; }
+  .wlm .segp:has(button:active) i { scale: none; }
+}
+/* In-screen motion for 건의·투표 (VoteFeedbackView) and 알레르기 (AllergyView / AllergySheet).
+   Resting styles stay in mobile.css; this file only adds the in-between. */
+
+/* Toggle pop: two identical keyframes so alternating classes restart the animation. */
+@keyframes wl-sa-pop-a {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.9);
+  }
+  70% {
+    transform: scale(1.07);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes wl-sa-pop-b {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.9);
+  }
+  70% {
+    transform: scale(1.07);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.wlm .pop0 {
+  animation: wl-sa-pop-a 0.36s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.wlm .pop1 {
+  animation: wl-sa-pop-b 0.36s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+/* Category chips: colour cross-fade already in mobile.css; add press feedback. */
+.wlm .cats button:active {
+  transform: scale(0.94);
+}
+
+/* Send button enable/disable. */
+.wlm .go {
+  transition:
+    opacity 0.22s ease,
+    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Chosen poll option label: check pop when it becomes "내 선택". */
+@keyframes wl-sa-check {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.86);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.wlm .poll button.op.me span {
+  display: inline-block;
+  transform-origin: left center;
+  animation: wl-sa-check 0.42s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+/* Sheet allergy chips. */
+.wlm .chip:active {
+  transform: scale(0.94);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wlm .pop0,
+  .wlm .pop1,
+  .wlm .poll button.op.me span {
+    animation: none !important;
+  }
+  .wlm .go,
+  .wlm .cats button {
+    transition: none !important;
+  }
+  .wlm .cats button:active,
+  .wlm .chip:active {
+    transform: none;
+  }
+}
+/* University home + 식당 tab micro-motion (UnivHomeView, UnivMenuView). Resting state is unchanged. */
+
+/* Home: congestion bars grow from the left on mount (re-run after pull-to-refresh). */
+.wlm #cafs .mb i { transform-origin: left center; animation: wl-u-grow-x .7s cubic-bezier(.2,.8,.2,1) both; animation-delay: 260ms; }
+.wlm #cafs .cfr:nth-of-type(2) .mb i { animation-delay: 320ms; }
+.wlm #cafs .cfr:nth-of-type(3) .mb i { animation-delay: 380ms; }
+.wlm #cafs .cfr:nth-of-type(4) .mb i { animation-delay: 440ms; }
+.wlm #cafs .cfr:nth-of-type(5) .mb i { animation-delay: 500ms; }
+@keyframes wl-u-grow-x { from { transform: scaleX(0); } }
+
+/* 식당 tab: hourly congestion bars grow up in sequence, then the current slot pulses once. */
+.wlm .cgr i { position: relative; transform-origin: center bottom; animation: wl-u-grow-y .6s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--n, 0) * 40ms + 80ms); }
+.wlm .cgr div.now i::after { content: ""; position: absolute; inset: -4px; border-radius: 10px 10px 6px 6px; box-shadow: 0 0 0 2px var(--ink); opacity: 0; pointer-events: none;
+  animation: wl-u-ring .9s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--n, 0) * 40ms + 680ms); }
+@keyframes wl-u-grow-y { from { transform: scaleY(0); } }
+@keyframes wl-u-ring { 0% { opacity: .8; transform: scale(1); } 100% { opacity: 0; transform: scale(1.18, 1.08); } }
+
+/* 식당 tab: the selected-cafeteria outline is a shared element that slides between pills. */
+.wlm .cafs button { position: relative; }
+.wlm .cafs button.on { border-color: transparent; }
+.wlm .cafs .wl-u-ind { position: absolute; inset: -2px; border: 2px solid var(--ink); border-radius: 16px; pointer-events: none; }
+::view-transition-group(.wl-u-ind) { animation-duration: 320ms; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
+::view-transition-old(.wl-u-ind) { animation: none; opacity: 0; }
+::view-transition-new(.wl-u-ind) { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wlm #cafs .mb i, .wlm .cgr i, .wlm .cgr div.now i::after { animation: none !important; }
+  ::view-transition-group(.wl-u-ind) { animation: none !important; }
+}
+
+/* ---- SsalTech: 생활관 식단용으로 더한 것 ---- */
+/* 아직 올라오지 않은 날 */
+.wlm .wk button.na:not(.on) b, .wlm .wk button.na:not(.on) small { opacity: .38; }
+.wlm .cg button.na b { color: #C3C7CF; }
+.wlm .cg button.td.na b { color: #fff; }
+/* 별점 4점 이상 메뉴 */
+.wlm .ml .fav { display: inline-flex; vertical-align: -2px; margin-left: 4px; font-style: normal; }
+.wlm .ml .fav svg { width: 15px; height: 15px; }
+/* 식당 알약 보조 줄 */
+.wlm .cafs button small.ct { background: #F3F4F7; color: var(--ink2); }
+/* 월간 달력 달 넘기기 */
+.wlm .cal .ct b { display: flex; align-items: center; gap: 6px; }
+.wlm .cal .mnav { width: 28px; height: 28px; border-radius: 50%; font-size: 20px; line-height: 1; color: var(--ink2); display: grid; place-items: center; }
+.wlm .cal .mnav:active { background: #F1F2F5; }
+.wlm .cal .mnav:disabled { opacity: .3; }
+/* 메인 메뉴 칸: 긴 이름은 줄인다 */
+.wlm .mcard .mh .price { max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 달력: 긴 메뉴 이름이 칸을 넓히지 않게 */
+.wlm .cg { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.wlm .cg button small { max-width: 100%; word-break: break-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* 마스코트가 넘친 머리말이 포커스·scrollIntoView로 옆으로 밀리지 않게 */
+.wlm .hhead { overflow: clip; }
+.wlm .foot a, .wlm .sub a { color: var(--ink2, #4b5160); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
