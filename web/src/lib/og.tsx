@@ -66,27 +66,59 @@ export function HomeCard({ moa }: { moa: string }) {
 }
 
 export function MealCard({ view, moa }: { view: MealView; moa: string }) {
-  const dish = view.dish ? clip(view.dish, 18) : view.registered ? "운영하지 않아요" : "아직 식단이 없어요";
-  const items = view.items.slice(0, 5).map((s) => clip(s, 16));
-  return shell(1200, 630, [
-    <div key="t" style={{ display: "flex", flexDirection: "column", width: 820, padding: "64px 36px 64px 72px" }}>
-      <div style={{ display: "flex", fontSize: 26, color: "#fff" }}>SsalTech · {view.dormName}</div>
-      <div style={{ display: "flex", marginTop: 18, fontSize: 32, color: "#FFE8DF" }}>
-        {view.dateLabel} {view.mealName}
+  const dish = view.dish ? clip(view.dish, 16) : view.registered ? "운영하지 않아요" : "아직 식단이 없어요";
+  const dishSize = dish.length <= 8 ? 68 : dish.length <= 11 ? 54 : 44;
+  const items = view.items.slice(0, 6).map((s) => clip(s, 12));
+  // 메뉴는 흰 카드에 짙은 글씨로 쓴다(주황 바탕에 흰 글씨는 잘 안 보인다). 정사각형으로 잘려도 읽히게 가운데 둔다.
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        width: 1200,
+        height: 630,
+        backgroundImage: "linear-gradient(135deg, #FF9A62 0%, #FF6A45 55%, #F2545B 100%)",
+        fontFamily: "Pretendard",
+        color: "#17191E",
+      }}
+    >
+      <div style={{ display: "flex", marginBottom: 22, fontSize: 26, color: "#fff" }}>SsalTech · 서울과기대 생활관 식단</div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          width: 760,
+          padding: "44px 52px 34px",
+          borderRadius: 40,
+          background: "#fff",
+          boxShadow: "0 24px 60px rgba(120,30,20,.28)",
+        }}
+      >
+        <div style={{ display: "flex", fontSize: 30 }}>
+          <span style={{ color: "#F0502E" }}>
+            {view.dateLabel} {view.mealName}
+          </span>
+          <span style={{ marginLeft: 12, color: "#6B7280" }}>{view.dormName}</span>
+        </div>
+        <div style={{ display: "flex", marginTop: 10, fontSize: dishSize, lineHeight: 1.15 }}>{dish}</div>
+        <div style={{ display: "flex", flexWrap: "wrap", marginTop: 22 }}>
+          {items.length > 0 ? (
+            items.map((item) => (
+              <div key={item} style={{ display: "flex", margin: "0 10px 10px 0", padding: "8px 18px", borderRadius: 999, background: "#FFF1EA", fontSize: 26, color: "#33363D" }}>
+                {item}
+              </div>
+            ))
+          ) : (
+            <div style={{ display: "flex", marginBottom: 10, fontSize: 26, color: "#33363D" }}>{clip(view.body, 30)}</div>
+          )}
+        </div>
       </div>
-      <div style={{ display: "flex", marginTop: 12, fontSize: 68, lineHeight: 1.15, color: "#fff" }}>{dish}</div>
-      <div style={{ display: "flex", flexDirection: "column", marginTop: 24 }}>
-        {items.map((item) => (
-          <div key={item} style={{ display: "flex", fontSize: 26, color: "#fff", lineHeight: 1.45 }}>
-            {item}
-          </div>
-        ))}
-      </div>
-    </div>,
-    <div key="m" style={{ display: "flex", width: 380, height: 630, alignItems: "center", justifyContent: "center" }}>
-      <img src={moa} width={240} height={240} alt="" style={{ borderRadius: 40 }} />
-    </div>,
-  ]);
+      <img src={moa} width={170} height={170} alt="" style={{ position: "absolute", right: 36, bottom: 30 }} />
+    </div>
+  );
 }
 
 export function StoryCard({ view, moa }: { view: MealView; moa: string }) {

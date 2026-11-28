@@ -133,6 +133,9 @@ async function shareKakao(meal: ShareMeal, toast: (m: string) => void) {
         title,
         description: meal.text || "서울과기대 생활관 식단",
         imageUrl: `https://dorm.ybkim.pe.kr/s/${meal.dorm}/${meal.date}/${meal.meal}/opengraph-image`,
+        // 크기를 안 주면 카카오톡이 정사각형으로 잘라 가운데만 보인다.
+        imageWidth: 1200,
+        imageHeight: 630,
         link: { mobileWebUrl: url, webUrl: url },
       },
       buttons: [{ title: "식단 보기", link: { mobileWebUrl: url, webUrl: url } }],
@@ -181,9 +184,10 @@ async function shareInstagramDm(meal: ShareMeal, toast: (m: string) => void) {
       if (err instanceof Error && err.name === "AbortError") return;
     }
   }
+  // 데스크톱: 웹에서 DM 에 글을 미리 채울 수는 없어, 받는 사람을 고르는 새 메시지 창을 열고 링크는 복사해 둔다.
   const copied = await copyText(url);
-  window.open("https://www.instagram.com/direct/inbox/", "_blank", "noopener,noreferrer");
-  toast(copied ? "링크를 복사했어요. 인스타그램 DM 창에 붙여 넣어 주세요." : "인스타그램 DM 창에 링크를 붙여 넣어 주세요.");
+  window.open("https://www.instagram.com/direct/new/", "_blank", "noopener,noreferrer");
+  toast(copied ? "링크를 복사했어요. 받을 사람을 고르고 붙여 넣어 주세요." : "받을 사람을 고르고 링크를 붙여 넣어 주세요.");
   track("share", { net: "instagram_dm", target: key });
 }
 

@@ -121,7 +121,8 @@ function boot(): Boot {
   const sel = isYmd(date) ? date : kstToday();
   const dormSel = isDorm(dorm) ? dorm : null;
   const m = isMeal(meal) ? meal : null;
-  if (!s) return { s, screen: "onb", sel, dormSel, meal: null };
+  // 처음 온 사람도 공유·알림 링크(?date=&meal=)면 그 메뉴부터 보여 준다. 기록은 남기지 않아 다음에 그냥 오면 첫 화면이 뜬다.
+  if (!s && !(isYmd(date) && m)) return { s, screen: "onb", sel, dormSel, meal: null };
   // 알림·공유 링크(?date=&meal=)는 식단표에서 그 메뉴를 연다.
   const screen: Screen = tab && isTab(tab as Screen) ? (tab as Tab) : isYmd(date) ? "menu" : "home";
   return { s, screen, sel, dormSel, meal: m };
